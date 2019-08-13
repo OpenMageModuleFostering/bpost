@@ -44,6 +44,7 @@ class Bpost_ShM_Model_Shipping_Geocode
         if($key) {
             $url .= '&key='.$key;
         }
+        Mage::helper('bpost_shm')->log("Geo URL: " . $url, Zend_Log::DEBUG);
         try{
             $xml = simplexml_load_file($url);
             switch($xml->status){
@@ -79,7 +80,7 @@ class Bpost_ShM_Model_Shipping_Geocode
                     return $errormsg;
                     break;
                 default:
-                    $errormsg = "Geocode: unknown Status";
+                    $errormsg = "Geocode: unknown Status " . $xml->status;
                     Mage::helper('bpost_shm')->log($errormsg, Zend_Log::ERR);
                     return $errormsg;
                     break;

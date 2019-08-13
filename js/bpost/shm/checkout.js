@@ -112,6 +112,12 @@ Bpost.ShM = Class.create({
             }
         }
 
+        if(currentShippingMethod.indexOf("bpostshm_bpost_") === 0) {
+            $$('input[name="bpost[deliverydate]"]').first().addClassName('required-entry');
+        } else {
+            $$('input[name="bpost[deliverydate]"]').first().removeClassName('required-entry');
+        }
+
         //set initial selected spot to false
         this.selectedspot = false;
 
@@ -178,6 +184,13 @@ Bpost.ShM = Class.create({
         $(document).on('change', 'input[type=radio][name=shipping_method]', function (event) {
             //move map to correct shipping method
             var target = event.target;
+
+            if(event.target.value.indexOf("bpostshm_bpost_") === 0) {
+                $$('input[name="bpost[deliverydate]"]').first().addClassName('required-entry');
+            } else {
+                $$('input[name="bpost[deliverydate]"]').first().removeClassName('required-entry');
+            }
+
             this.rePosition(target);
             //show delivery date option
             this.deliveryDate(target);

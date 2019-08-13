@@ -37,7 +37,9 @@ class Bpost_ShM_Model_Observer extends Varien_Event_Observer
                 $html = str_replace('<dd>bpost</dd>', '<dd><img src="'.$logo.'" class="bpost-carrier-logo" />bpost</dd>', $html);
 
                 //intercept html and append block
-                $html .= Mage::app()->getLayout()->createBlock("bpost_shm/carrier_bpost")->setQuote($quote)->setTemplate("bpost/shm/append_bpost_shippingmethod.phtml")->toHtml();
+                if(strpos($html, 'bpost-carrier-logo')){
+                    $html .= Mage::app()->getLayout()->createBlock("bpost_shm/carrier_bpost")->setQuote($quote)->setTemplate("bpost/shm/append_bpost_shippingmethod.phtml")->toHtml();
+                }
                 //set HTML
                 $observer->getTransport()->setHtml($html);
             }
