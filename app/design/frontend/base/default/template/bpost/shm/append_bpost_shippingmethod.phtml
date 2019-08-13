@@ -63,11 +63,21 @@
     window.bpostShM = new Bpost.ShM(window.bpostSettings, "<?php echo $this->getCurrentShippingMethod(); ?>");
 
     Validation.add('validate-bpostspot', "<?php echo Mage::helper('bpost_shm')->__('Please select a bpost pick-up point'); ?>", function (v) {
-        return !($('s_method_bpostshm_bpost_pickuppoint').checked && Validation.get('IsEmpty').test(v))
+        if($('s_method_bpostshm_bpost_pickuppoint')) {
+            return !($('s_method_bpostshm_bpost_pickuppoint').checked && Validation.get('IsEmpty').test(v))
+        }
+        else{
+            return true;
+        }
     });
 
     Validation.add('validate-parcel', "<?php echo Mage::helper('bpost_shm')->__('Please select a bpost parcel locker'); ?>", function (v) {
-        return !($('s_method_bpostshm_bpost_parcellocker').checked && Validation.get('IsEmpty').test(v))
+        if($('s_method_bpostshm_bpost_parcellocker')) {
+            return !($('s_method_bpostshm_bpost_parcellocker').checked && Validation.get('IsEmpty').test(v))
+        }
+        else{
+            return true;
+        }
     });
 
     Validation.add('validate-multiple-delivery-dates', "<?php echo Mage::helper('bpost_shm')->__('Please select a delivery date'); ?>", function (v,elm) {

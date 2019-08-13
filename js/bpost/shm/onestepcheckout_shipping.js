@@ -13,7 +13,14 @@ Bpost.ShM.addMethods({
             fade: true,
             fadeDuration: 0.3,
             position: 'center',
-            destroyOnClose: true
+            destroyOnClose: true,
+            afterClose: function(){
+                if($('control_overlay')) {
+                    $('control_overlay').setStyle({
+                        display: 'none'
+                    });
+                }
+            }
         });
 
 
@@ -63,19 +70,19 @@ Bpost.ShM.addMethods({
         this.bpostClose = this.bpostClose.bind(this);
 
         this.imageOpenPostOffice = {
-            url: this.settings.base_url + 'skin/frontend/base/default/images/bpost/location_postoffice_default.png',
+            url: this.settings.location_postoffice_default_image,
             size: new google.maps.Size(24, 24),
             origin: new google.maps.Point(0, 0),
             anchor: new google.maps.Point(24, 36)
         };
         this.imageOpenPostPoint = {
-            url: this.settings.base_url + 'skin/frontend/base/default/images/bpost/location_postpoint_default.png',
+            url: this.settings.location_postpoint_default_image,
             size: new google.maps.Size(24, 24),
             origin: new google.maps.Point(0, 0),
             anchor: new google.maps.Point(24, 36)
         };
         this.imageOpenParcelLocker = {
-            url: this.settings.base_url + 'skin/frontend/base/default/images/bpost/location_parcellocker_default.png',
+            url: this.settings.location_parcellocker_default_image,
             size: new google.maps.Size(24, 24),
             origin: new google.maps.Point(0, 0),
             anchor: new google.maps.Point(24, 36)
