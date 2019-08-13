@@ -35,7 +35,7 @@ class Bpost_ShM_Adminhtml_Bpost_ShM_AllOrdersController extends Bpost_ShM_Contro
             return false;
         }
 
-        return Mage::getSingleton('admin/session')->isAllowed('sales/bpost_all_orders');
+        return Mage::getSingleton('admin/session')->isAllowed('sales/bpost_orders/bpost_all_orders');
     }
 
 

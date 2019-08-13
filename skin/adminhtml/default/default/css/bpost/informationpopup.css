@@ -20,7 +20,11 @@ td.subheader.value{
     padding:8px 5px 8px 0!important;
 }
 
+td.fulltext{
+    width:1175px !important;
+}
 .adminhtml-bpost-shm-config-gridinformationpopup{width: 100%;height: 240px; background: url('../../images/bpost/ajax-loader-red.gif') center no-repeat white;}
 .adminhtml-bpost-shm-config-gridinformationpopup .text-wrapper{position: absolute; bottom: 35px; text-align: center;}
 .adminhtml-bpost-shm-config-screenshotpopup{overflow: hidden}
 .adminhtml-bpost-shm-config-screenshotpopup .example-screenshot{width: 100%}
+#carriers_bpost_clickcollect_marker_image{height:18px; width: 18px;}

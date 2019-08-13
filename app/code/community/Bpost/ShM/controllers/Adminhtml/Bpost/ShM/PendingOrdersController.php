@@ -35,7 +35,7 @@ class Bpost_ShM_Adminhtml_Bpost_ShM_PendingOrdersController extends Bpost_ShM_Co
             return false;
         }
 
-        return Mage::getSingleton('admin/session')->isAllowed('sales/bpost_pending_orders');
+        return Mage::getSingleton('admin/session')->isAllowed('sales/bpost_orders/bpost_pending_orders');
     }
 }
 

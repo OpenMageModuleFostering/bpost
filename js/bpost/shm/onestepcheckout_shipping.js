@@ -41,6 +41,12 @@ Bpost.ShM.addMethods({
             $('selectPickupPoint').style.display = 'inline';
         }
 
+        if(currentShippingMethod == carrier+"_bpost_clickcollect"){
+            this.container.down('label[for="s_method_'+carrier+'_bpost_clickcollect"]').insert({'after': $("bpostShm")});
+            activeOption = "s_method_"+carrier+"_bpost_clickcollect";
+            $('selectPickupPoint').style.display = 'inline';
+        }
+
         //init datepicker if bpost carrier is selected
         if(currentShippingMethod == carrier+"_bpost_homedelivery" || currentShippingMethod == carrier+"_bpost_international")
         {
@@ -87,6 +93,21 @@ Bpost.ShM.addMethods({
             origin: new google.maps.Point(0, 0),
             anchor: new google.maps.Point(24, 36)
         };
+        if(this.settings.location_clickcollect_custom_image){
+            this.imageOpenClickCollect = {
+                url: this.settings.location_clickcollect_custom_image,
+                size: new google.maps.Size(24, 24),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(24, 36)
+            };
+        }else{
+            this.imageOpenClickCollect = {
+                url: this.settings.location_clickcollect_default_image,
+                size: new google.maps.Size(24, 24),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(24, 36)
+            };
+        }
         this.mapOptions = {
             zoom: 13,
             panControl: false,

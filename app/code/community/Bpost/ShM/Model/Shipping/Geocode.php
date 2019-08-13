@@ -30,7 +30,7 @@ class Bpost_ShM_Model_Shipping_Geocode
     public function callGoogleMaps($gMapsAddress, $latitude = false, $longitude = false)
     {
         $configHelper = Mage::helper("bpost_shm/system_config");
-        $key = $configHelper->getBpostShippingConfig("server_api_key");
+        $key = $configHelper->getBpostShippingConfig("server_api_key", Mage::app()->getStore()->getId());
 
         if($gMapsAddress) {
             $this->_addressLine = $gMapsAddress;

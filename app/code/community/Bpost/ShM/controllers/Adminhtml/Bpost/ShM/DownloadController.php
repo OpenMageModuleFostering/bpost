@@ -110,6 +110,6 @@ class Bpost_ShM_Adminhtml_Bpost_ShM_DownloadController extends Mage_Adminhtml_Co
      */
     protected function _isAllowed()
     {
-        return Mage::getSingleton('admin/session')->isAllowed('sales/bpost_download_labels');
+        return Mage::getSingleton('admin/session')->isAllowed('sales/bpost_orders/bpost_download_labels');
     }
 }

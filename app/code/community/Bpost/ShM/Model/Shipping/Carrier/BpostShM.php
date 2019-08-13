@@ -35,6 +35,7 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
         $checkoutSession = Mage::getSingleton('checkout/session');
 
         $ratePriceByMethod = array();
+        $totalAallowedShippingMethods = count($this->getAllowedMethods());
 
         foreach ($this->getAllowedMethods() as $shippingMethodCode => $shippingMethodName) {
             if (!$this->getBpostConfigData('active', $shippingMethodCode) || !$this->checkAvailableBpostShipCountries($request, $shippingMethodCode)) {
@@ -134,7 +135,7 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
             $ratePriceByMethod[$this->_code . "_" . $shippingMethodCode] = $price;
 
             if ((bool)$saturdayDelivery &&
-                (bool)Mage::helper("bpost_shm/system_config")->getBpostShippingConfig("display_delivery_date") &&
+                (bool)Mage::helper("bpost_shm/system_config")->getBpostShippingConfig("display_delivery_date", Mage::app()->getStore()->getId()) &&
                 !(bool)$checkoutSession->getQuote()->getData("bpost_disable_saturday_delivery")
             ) {
                 $price = $price + $saturdayDeliveryCost;
@@ -149,7 +150,7 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
             $result->append($method);
         }
 
-        if ($disabledShippingMethods == 4) {
+        if ($disabledShippingMethods == $totalAallowedShippingMethods) {
             return false;
         }
 
@@ -190,7 +191,8 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
             'bpost_homedelivery' => Mage::getStoreConfig('carriers/bpost_homedelivery/name', $this->getStore()),
             'bpost_international' => Mage::getStoreConfig('carriers/bpost_international/name', $this->getStore()),
             'bpost_parcellocker' => Mage::getStoreConfig('carriers/bpost_parcellocker/name', $this->getStore()),
-            'bpost_pickuppoint' => Mage::getStoreConfig('carriers/bpost_pickuppoint/name', $this->getStore())
+            'bpost_pickuppoint' => Mage::getStoreConfig('carriers/bpost_pickuppoint/name', $this->getStore()),
+            'bpost_clickcollect' => Mage::getStoreConfig('carriers/bpost_clickcollect/name', $this->getStore())
         );
 
         return $allowedMethods;
@@ -309,7 +311,8 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
         //we check on national shipping country Belgium
         if (($shippingMethodCode === "bpost_homedelivery" ||
                 $shippingMethodCode === "bpost_parcellocker" ||
-                $shippingMethodCode === "bpost_pickuppoint") &&
+                $shippingMethodCode === "bpost_pickuppoint" ||
+                $shippingMethodCode === "bpost_clickcollect") &&
             $countryId != "BE"
         ) {
             return false;

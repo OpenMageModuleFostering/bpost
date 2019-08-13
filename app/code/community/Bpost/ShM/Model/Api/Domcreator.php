@@ -16,25 +16,27 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
      * @param Mage_Sales_Model_Order $order
      * function builds the necessary DOM document and returns it
      * this result will be used in the API calls as post data
+     * @return DOMDocument
      */
     public function getCreateOrderDomDocument($order, $returnOrder = false){
         //initialize helper
         $configHelper = Mage::helper("bpost_shm/system_config");
         $bpostHelper = Mage::helper("bpost_shm");
         $shippingMethod = $order->getShippingMethod();
+        $storeId = $order->getStoreId();
 
         //get sender
         $senderData = new Varien_Object();
-        $senderData->setBpostName($configHelper->getBpostShippingConfig("sender_name"));
-        $senderData->setBpostCompany($configHelper->getBpostShippingConfig("sender_company"));
-        $senderData->setBpostStreet($configHelper->getBpostShippingConfig("sender_streetname"));
-        $senderData->setBpostHouseNumber($configHelper->getBpostShippingConfig("sender_streetnumber"));
-        $senderData->setBoxNumber($configHelper->getBpostShippingConfig("sender_boxnumber"));
-        $senderData->setPostcode($configHelper->getBpostShippingConfig("sender_postal_code"));
-        $senderData->setCity($configHelper->getBpostShippingConfig("sender_city"));
-        $senderData->setCountryId($configHelper->getBpostShippingConfig("sender_country"));
-        $senderData->setEmail($configHelper->getBpostShippingConfig("sender_email"));
-        $senderData->setTelephone(preg_replace('/[^0-9]/s', '',$configHelper->getBpostShippingConfig("sender_phonenumber")));
+        $senderData->setBpostName($configHelper->getBpostShippingConfig("sender_name", $storeId));
+        $senderData->setBpostCompany($configHelper->getBpostShippingConfig("sender_company", $storeId));
+        $senderData->setBpostStreet($configHelper->getBpostShippingConfig("sender_streetname", $storeId));
+        $senderData->setBpostHouseNumber($configHelper->getBpostShippingConfig("sender_streetnumber", $storeId));
+        $senderData->setBoxNumber($configHelper->getBpostShippingConfig("sender_boxnumber", $storeId));
+        $senderData->setPostcode($configHelper->getBpostShippingConfig("sender_postal_code", $storeId));
+        $senderData->setCity($configHelper->getBpostShippingConfig("sender_city", $storeId));
+        $senderData->setCountryId($configHelper->getBpostShippingConfig("sender_country", $storeId));
+        $senderData->setEmail($configHelper->getBpostShippingConfig("sender_email", $storeId));
+        $senderData->setTelephone(preg_replace('/[^0-9]/s', '',$configHelper->getBpostShippingConfig("sender_phonenumber", $storeId)));
 
         //get receiver
         $this->_shippingAddress = $order->getShippingAddress();
@@ -129,7 +131,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
             $weightInGrams = 1;
         }
 
-        if(($shippingMethod == "bpostshm_bpost_parcellocker" || $shippingMethod == "bpostshm_bpost_international") && $weightInGrams < 10){
+        if(($shippingMethod == "bpostshm_bpost_parcellocker" || $shippingMethod == "bpostshm_bpost_international" || $shippingMethod == "bpostshm_bpost_clickcollect") && $weightInGrams < 10){
             $weightInGrams = 10;
         }
         //end weight
@@ -147,7 +149,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
         $addressNumber->appendChild($document->createTextNode($senderData->getBpostHouseNumber()));
 
         //only add element if available
-        $boxNumber = $configHelper->getBpostShippingConfig($senderData->getBoxNumber());
+        $boxNumber = $configHelper->getBpostShippingConfig($senderData->getBoxNumber(), $storeId);
 
         if($boxNumber && $boxNumber != ''){
             $addressBox = $document->createElement('common:box');
@@ -496,7 +498,78 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
 
                 $nationalBox->appendChild($atTwentyFourSeven);
                 break;
+
+            case "bpostshm_bpost_clickcollect":
+                if(!$order->getBpostPickuplocationId()){
+                    //only throw error in backend
+                    if($manageLabels){
+                        Mage::throwException("No pickup location order data found.");
+                    }
+                }
+
+                $product->appendChild($document->createTextNode("bpack Click & Collect"));
+
+                //add the notification options
+                //check if bpost notification sms or mail isset
+                if($order->getBpostNotificationSms() || $order->getBpostNotificationEmail()){
+                    if($order->getBpostNotificationSms()){
+                        $options->appendChild($this->_addNotificationMessageOption($document, $order, "keepMeInformed", "sms"));
+                    }else{
+                        $options->appendChild($this->_addNotificationMessageOption($document, $order, "keepMeInformed"));
+                    }
+                }
+
+                //then get the config option settings
+                $options = $this->_checkIfOptionIsValid($document, $options, $order, "bpost_clickcollect", "insurance", "insured");
+                $options = $this->_checkIfOptionIsValid($document, $options, $order, "bpost_clickcollect", "saturday_delivery", "saturdayDelivery");
+
+                $formattedAddress = $bpostHelper->formatShippingAddress($this->_shippingAddress);
+
+                $pugoId = $document->createElement('pugoId');
+                $pugoId->appendChild($document->createTextNode($order->getBpostPickuplocationId()));
+
+                $pugoName = $document->createElement('pugoName');
+                $pugoName->appendChild($document->createTextNode($this->_shippingAddress->getLastname()));
+
+                //Address tags
+                $streetName->appendChild($document->createTextNode($formattedAddress["street"]));
+                $streetNumber->appendChild($document->createTextNode($formattedAddress["number"]));
+
+                $streetPostalCode->appendChild($document->createTextNode($formattedAddress["postcode"]));
+                $locality->appendChild($document->createTextNode($formattedAddress["city"]));
+                $countryCode->appendChild($document->createTextNode($this->_shippingAddress->getCountryId()));
+
+                $pugoAddress = $document->createElement('pugoAddress');
+                $pugoAddress->appendChild($streetName);
+                $pugoAddress->appendChild($streetNumber);
+                $pugoAddress->appendChild($streetPostalCode);
+                $pugoAddress->appendChild($locality);
+                $pugoAddress->appendChild($countryCode);
+                //end address tags
+
+                $atBpost = $document->createElement('atBpost');
+                $atBpost->appendChild($product);
+
+                if($options->hasChildNodes()){
+                    $atBpost->appendChild($options);
+                }
+
+                $atBpost->appendChild($weight);
+                $atBpost->appendChild($pugoId);
+                $atBpost->appendChild($pugoName);
+                $atBpost->appendChild($pugoAddress);
+                $atBpost->appendChild($receiverName);
+                $atBpost->appendChild($receiverCompany);
+
+                if($reqDeliveryDate) {
+                    $atBpost->appendChild($reqDeliveryDate);
+                }
+
+                $nationalBox->appendChild($atBpost);
+
+                break;
         }
+
         return $nationalBox;
     }
 

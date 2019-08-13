@@ -40,7 +40,6 @@ class Bpost_ShM_AjaxController extends Mage_Core_Controller_Front_Action {
                 $poiList = "";
                 $error[] = Mage::helper('bpost_shm')->__("Sorry, there was a problem contacting bpost, please contact the store owner for support.");
             }
-
             $payloadFull = array("error" => $error, "poilist" => $poiList, "coordinates" => $coordinates);
             $this->getResponse()->setHeader('Content-type', 'application/json');
             $this->getResponse()->setBody(json_encode($payloadFull));
@@ -58,7 +57,7 @@ class Bpost_ShM_AjaxController extends Mage_Core_Controller_Front_Action {
             $error = array();
             $params = $request->getParams();
 
-            $id = isset($params["id"]) && is_numeric($params["id"]) ? $params["id"] : false;
+            $id = isset($params["id"]) ? $params["id"] : false;
             $type = isset($params["type"]) && is_numeric($params["type"]) ? $params["type"] : false;
             $spots = isset($params["spots"]) ? json_decode($params["spots"]) : false;
 

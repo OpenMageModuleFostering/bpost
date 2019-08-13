@@ -541,7 +541,8 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
         $shippingMethods = array(
             'bpost_homedelivery' => false,
             'bpost_pickuppoint' => false,
-            'bpost_parcellocker' => false
+            'bpost_parcellocker' => false,
+            'bpost_clickcollect' => false
         );
         foreach ($shippingMethods as $method => $value) {
             //get saturday delivery flags
@@ -683,6 +684,18 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
                 }
             }
         }
+
+        if($method == 'bpost_clickcollect') {
+            //check if pick-up point is open on this day
+            if(is_array($closedOn)) {
+                $day = $this->_formatDeliveryDate($deliveryDate, 'l');
+
+                if(in_array($day, $closedOn)) {
+                    return false;
+                }
+            }
+        }
+
         return true;
     }
 
@@ -799,7 +812,7 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
     public function processShipmentsWeight($order)
     {
         $bpostHelper = Mage::helper("bpost_shm/system_config");
-        $weightUnit = $bpostHelper->getBpostShippingConfig("weight_unit");
+        $weightUnit = $bpostHelper->getBpostShippingConfig("weight_unit", $order->getStoreId());
 
         $totalShipmentsWeight = 0;
 

@@ -14,7 +14,7 @@ class Bpost_ShM_Block_Adminhtml_System_Config_Form_Field_Logo extends Mage_Admin
     {
         $bpostLogoMessage = Mage::helper('bpost_shm')->__('Click here for more information');
         $popupUrl = "'" . $this->getUrl('adminhtml/bpost_shM_config/informationpopup') . "'";
-        $html = '<a class="bpostInfo" href="#" onclick="openPopup(' . $popupUrl . ',600,400);">';
+        $html = '<a id="' . $element->getHtmlId() . '" class="bpostInfo" href="#" onclick="openPopup(' . $popupUrl . ',600,400);">';
         $html .= '<span>' . $bpostLogoMessage . '</span> ';
         $html .= '</a>';
         return $html;

@@ -9,7 +9,8 @@ class Bpost_ShM_Block_Adminhtml_System_Config_Form_Field_Subheader extends Mage_
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         $label = $element->getLabelHtml();
-        $html = '<tr><td colspan="4" class="subheader value">'.Mage::helper("bpost_shm")->__($label).'</td></tr>';
+        $html = '<tr><td colspan="4" class="subheader value"><div id="' . $element->getHtmlId() . '">' .
+            Mage::helper("bpost_shm")->__($label).'</div></td></tr>';
 
         return $html;
     }

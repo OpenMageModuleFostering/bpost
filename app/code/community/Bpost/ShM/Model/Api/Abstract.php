@@ -12,7 +12,6 @@ class Bpost_ShM_Model_Api_Abstract extends Mage_Core_Model_Abstract
     const API_PATH_PREFIX           = '/services/shm';
     const API_URI_TAXIPOST_BASE     = "http://taxipost.geo6.be";
     const API_TAXIPOST_APPID        = "A001";
-    const API_TAXIPOST_PARTNER      = "999999";
 
     protected $_apiUriBase;
     protected $_accountId;
@@ -56,9 +55,9 @@ class Bpost_ShM_Model_Api_Abstract extends Mage_Core_Model_Abstract
     public function initialize(){
         $configHelper = Mage::helper("bpost_shm/system_config");
 
-        $this->_apiUriBase = $configHelper->getBpostShippingConfig("api_url");
-        $this->_accountId = $this->_bpostConfigHelper->getBpostShippingConfig("accountid");
-        $this->_passphrase = $this->_bpostConfigHelper->getBpostShippingConfig("passphrase");
+        $this->_apiUriBase = $configHelper->getBpostShippingConfig("api_url", Mage::app()->getStore()->getId());
+        $this->_accountId = $this->_bpostConfigHelper->getBpostShippingConfig("accountid", Mage::app()->getStore()->getId());
+        $this->_passphrase = $this->_bpostConfigHelper->getBpostShippingConfig("passphrase", Mage::app()->getStore()->getId());
         $this->_authorization = base64_encode($this->_accountId . ':' . $this->_passphrase);
         $this->_initialized = true;
     }
@@ -192,13 +191,12 @@ class Bpost_ShM_Model_Api_Abstract extends Mage_Core_Model_Abstract
      */
     protected function _callTaxipostApi($params){
         $urlExtension = "Locator";
-        $params["Partner"] = self::API_TAXIPOST_PARTNER;
+        $params["Partner"] = Mage::getStoreConfig("shipping/bpost_shm/accountid");
         $params["AppId"] = self::API_TAXIPOST_APPID;
 
         $httpClient = $this->_getTaxipostHttpClient($urlExtension);
         $httpClient->setParameterGet($params);
         $response = $httpClient->request('GET');
-
         try{
             $this->_checkApiResponse($httpClient->getLastRequest(), $response);
 

@@ -187,8 +187,10 @@ class Bpost_ShM_Model_Api extends Bpost_ShM_Model_Api_Abstract
         //$params["Street"] = $addressData["street"];
         //$params["Number"] = $addressData["number"];
         $params["Zone"] = $addressData["zone"];
+        if($type == 8){
+            $params["CheckOpen"] = 0;
+        }
         $response = $this->_callTaxipostApi($params);
-
         return $response->getBody();
     }
 

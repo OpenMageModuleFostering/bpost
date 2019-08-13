@@ -155,12 +155,49 @@ class Bpost_ShM_Model_Adminhtml_Observer extends Varien_Event_Observer
                 Mage::throwException("Failed to authenticate with bpost, please check your credentials.");
             }
 
+            //check if click & collect is allowed and trigger
+            $this->_checkAndTriggerClickCollect($apiResponse->getBody());
+
             $session->addSuccess($configHelper->__("Successfully authenticated with bpost."));
         }catch(Exception $e){
             $session->addError($configHelper->__($e->getMessage()));
         }
 
         return $this;
+    }
+
+
+    protected function _checkAndTriggerClickCollect($apiResponseBody){
+        $xml = simplexml_load_string($apiResponseBody);
+        foreach ($xml->deliveryMethod as $deliveryMethodData) {
+            if($deliveryMethodData['name'] == "Click & Collect" && $deliveryMethodData['visiblity'] == "VISIBLE"){
+                Mage::getConfig()->saveConfig('carriers/bpost_clickcollect/activated', '1');
+                Mage::getConfig()->saveConfig('carriers/bpost_clickcollect/active', '1');
+                if(Mage::getStoreConfig('carriers/bpost_clickcollect/marker') == ""){
+
+                    $src = Mage::getBaseDir('skin') .
+                        DS . 'frontend' .
+                        DS . 'base' .
+                        DS . 'default' .
+                        DS . 'images' . DS . 'bpost' . DS . 'location_clickcollect_default.png';
+
+                    $dest = Mage::getBaseDir('media') .
+                        DS . 'bpost' . DS . 'default' . DS . 'location_clickcollect_default.png';
+
+                    $io = new Varien_Io_File();
+                    $io->cp($src, $dest);
+                    Mage::getConfig()
+                        ->saveConfig('carriers/bpost_clickcollect/marker', 'default/location_clickcollect_default.png');
+                }
+                Mage::app()->getCacheInstance()->cleanType('config');
+                return $this;
+            }
+            elseif(Mage::getStoreConfig('carriers/bpost_clickcollect/activated') == 1){
+                Mage::getConfig()->saveConfig('carriers/bpost_clickcollect/activated', '0');
+                Mage::getConfig()->saveConfig('carriers/bpost_clickcollect/active', '0');
+                Mage::app()->getCacheInstance()->cleanType('config');
+            }
+        }
     }
 
     /**
@@ -176,4 +213,5 @@ class Bpost_ShM_Model_Adminhtml_Observer extends Varien_Event_Observer
             $shipment->setTotalWeight($weight);
         }
     }
+
 }

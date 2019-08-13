@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Bpost_ShM>
-            <version>1.1.0</version>
+            <version>1.1.3</version>
         </Bpost_ShM>
     </modules>
     <global>
@@ -34,6 +34,10 @@
                     <bpost_tablerates_parcellocker>
                         <table>bpost_tablerates_parcellocker</table>
                     </bpost_tablerates_parcellocker>
+
+                    <bpost_tablerates_clickcollect>
+                        <table>bpost_tablerates_clickcollect</table>
+                    </bpost_tablerates_clickcollect>
 
                     <returnlabel>
                         <table>bpost_shipping_returnlabel</table>
@@ -157,41 +161,41 @@
                 </observers>
             </controller_action_predispatch_onestepcheckout_index_index>
 
-            <controller_action_predispatch_checkout_onepage_savebilling>
+            <controller_action_predispatch_checkout_onepage_saveBilling>
                 <observers>
                     <bpost_shm_controller_action_predispatch_checkout_onepage_savebilling>
                         <class>bpost_shm/observer</class>
                         <method>controller_action_predispatch_checkout_onepage_saveAddress</method>
                     </bpost_shm_controller_action_predispatch_checkout_onepage_savebilling>
                 </observers>
-            </controller_action_predispatch_checkout_onepage_savebilling>
+            </controller_action_predispatch_checkout_onepage_saveBilling>
 
-            <controller_action_predispatch_checkout_onepage_saveshipping>
+            <controller_action_predispatch_checkout_onepage_saveShipping>
                 <observers>
                     <bpost_shm_controller_action_predispatch_checkout_onepage_saveshipping>
                         <class>bpost_shm/observer</class>
                         <method>controller_action_predispatch_checkout_onepage_saveAddress</method>
                     </bpost_shm_controller_action_predispatch_checkout_onepage_saveshipping>
                 </observers>
-            </controller_action_predispatch_checkout_onepage_saveshipping>
+            </controller_action_predispatch_checkout_onepage_saveShipping>
 
-            <controller_action_postdispatch_checkout_onepage_savebilling>
+            <controller_action_postdispatch_checkout_onepage_saveBilling>
                 <observers>
                     <bpost_shm_controller_action_postdispatch_checkout_onepage_savebilling>
                         <class>bpost_shm/observer</class>
                         <method>controller_action_postdispatch_checkout_onepage_saveAddress</method>
                     </bpost_shm_controller_action_postdispatch_checkout_onepage_savebilling>
                 </observers>
-            </controller_action_postdispatch_checkout_onepage_savebilling>
+            </controller_action_postdispatch_checkout_onepage_saveBilling>
 
-            <controller_action_postdispatch_checkout_onepage_saveshipping>
+            <controller_action_postdispatch_checkout_onepage_saveShipping>
                 <observers>
                     <bpost_shm_controller_action_postdispatch_checkout_onepage_saveshipping>
                         <class>bpost_shm/observer</class>
                         <method>controller_action_postdispatch_checkout_onepage_saveAddress</method>
                     </bpost_shm_controller_action_postdispatch_checkout_onepage_saveshipping>
                 </observers>
-            </controller_action_postdispatch_checkout_onepage_saveshipping>
+            </controller_action_postdispatch_checkout_onepage_saveShipping>
 
             <controller_action_postdispatch_onestepcheckout_ajax_save_billing>
                 <observers>
@@ -361,6 +365,19 @@
                 <saturday_delivery>0</saturday_delivery>
                 <specificerrmsg>Bpost parcel locker is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
             </bpost_parcellocker>
+            <bpost_clickcollect>
+                <activated>0</activated>
+                <active>0</active>
+                <title>bpost</title>
+                <name><![CDATA[Click & Collect]]></name>
+                <rate_type>0</rate_type>
+                <flat_rate_price>0</flat_rate_price>
+                <showmethod>1</showmethod>
+                <insurance>0</insurance>
+                <sort_order>20</sort_order>
+                <saturday_delivery>0</saturday_delivery>
+                <specificerrmsg><![CDATA[Bpost Click & Collect is currently unavailable. If you would like to ship using this shipping method, please contact the web merchant.]]></specificerrmsg>
+            </bpost_clickcollect>
         </carriers>
         <shipping>
             <bpost_shm>

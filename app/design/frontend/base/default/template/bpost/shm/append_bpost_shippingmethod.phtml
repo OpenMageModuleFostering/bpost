@@ -14,11 +14,13 @@
 
     <?php if($this->getCurrentShippingMethod() == "bpostshm_bpost_pickuppoint"){ ?>
         <a href="#" id="selectPickupPoint" type="3"><?php echo $settings['select_text'] ?></a>
+    <?php }elseif($this->getCurrentShippingMethod() == "bpostshm_bpost_clickcollect"){ ?>
+        <a href="#" id="selectPickupPoint" type="8"><?php echo $settings['select_text_clickcollect'] ?></a>
     <?php }else{ ?>
         <a href="#" id="selectPickupPoint" type="4"><?php echo $settings['select_text_parcel_locker'] ?></a>
     <?php } ?>
 
-    <input id="bpost-id" type="hidden" name="bpost[id]" class="validate-bpostspot validate-parcel"/>
+    <input id="bpost-id" type="hidden" name="bpost[id]" class="validate-bpostspot validate-parcel validate-clickcollect"/>
     <input type="hidden" name="bpost[street]"/>
     <input type="hidden" name="bpost[city]"/>
     <input type="hidden" name="bpost[postcode]"/>
@@ -72,6 +74,15 @@
     Validation.add('validate-bpostspot', "<?php echo Mage::helper('bpost_shm')->__('Please select a bpost pick-up point'); ?>", function (v) {
         if($('s_method_bpostshm_bpost_pickuppoint')) {
             return !($('s_method_bpostshm_bpost_pickuppoint').checked && Validation.get('IsEmpty').test(v))
+        }
+        else{
+            return true;
+        }
+    });
+
+    Validation.add('validate-clickcollect', "<?php echo Mage::helper('bpost_shm')->__('Please select a bpost Click & Collect point'); ?>", function (v) {
+        if($('s_method_bpostshm_bpost_clickcollect')) {
+            return !($('s_method_bpostshm_bpost_clickcollect').checked && Validation.get('IsEmpty').test(v))
         }
         else{
             return true;

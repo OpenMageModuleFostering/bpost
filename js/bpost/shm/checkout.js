@@ -47,6 +47,21 @@ Bpost.ShM = Class.create({
             origin: new google.maps.Point(0, 0),
             anchor: new google.maps.Point(24, 36)
         };
+        if(this.settings.location_clickcollect_custom_image){
+            this.imageOpenClickCollect = {
+                url: this.settings.location_clickcollect_custom_image,
+                size: new google.maps.Size(24, 24),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(24, 36)
+            };
+        }else{
+            this.imageOpenClickCollect = {
+                url: this.settings.location_clickcollect_default_image,
+                size: new google.maps.Size(24, 24),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(24, 36)
+            };
+        }
         this.mapOptions = {
             zoom: 13,
             panControl: false,
@@ -95,7 +110,9 @@ Bpost.ShM = Class.create({
         }
 
         //init map if bpost carrier is selected
-        if(currentShippingMethod == carrier+"_bpost_parcellocker" || currentShippingMethod == carrier+"_bpost_pickuppoint"){
+        if(currentShippingMethod == carrier+"_bpost_parcellocker"
+            || currentShippingMethod == carrier+"_bpost_pickuppoint"
+        || currentShippingMethod == carrier+"_bpost_clickcollect"){
             this.container.down('label[for="s_method_'+currentShippingMethod+'"]').insert({'after': $("bpostShm")});
             activeOption = "s_method_"+currentShippingMethod;
             $('selectPickupPoint').style.display = 'inline';
@@ -253,7 +270,10 @@ Bpost.ShM = Class.create({
     rePosition: function (target){
         activeOption = target.id;
 
-        if(activeOption == "s_method_"+carrier+"_bpost_parcellocker" || activeOption == "s_method_"+carrier+"_bpost_pickuppoint"){
+        if(activeOption == "s_method_"+carrier+"_bpost_parcellocker"
+            || activeOption == "s_method_"+carrier+"_bpost_pickuppoint"
+            || activeOption == "s_method_"+carrier+"_bpost_clickcollect"
+        ){
             //hide notifications window
             $("notifications-pick-up-point").style.display = "none";
             $("notifications-parcel-locker").style.display = "none";
@@ -270,7 +290,11 @@ Bpost.ShM = Class.create({
                 selectPickupPointElement.innerHTML = this.settings.select_text_parcel_locker;
                 //we set point type to 4
                 selectPickupPointElement.setAttribute("type", "4");
-            }else{
+            }else if(activeOption == "s_method_"+carrier+"_bpost_clickcollect"){
+                $("selectPickupPoint").setAttribute("type", 8)
+                $("selectPickupPoint").update(this.settings.select_text_clickcollect);
+            }
+            else{
                 selectPickupPointElement.innerHTML = this.settings.select_text;
                 //we set point type to 3
                 selectPickupPointElement.setAttribute("type", "3");
@@ -295,7 +319,10 @@ Bpost.ShM = Class.create({
         if(target.id == 's_method_'+carrier+'_bpost_homedelivery') {
             $(target).up().insert({'after': $("bpostDelivery")});
             $("bpostDelivery").style.display = 'block';
-        } else if(target.id == 's_method_'+carrier+'_bpost_parcellocker' || target.id == 's_method_'+carrier+'_bpost_pickuppoint') {
+        } else if(target.id == 's_method_'+carrier+'_bpost_parcellocker'
+            || target.id == 's_method_'+carrier+'_bpost_pickuppoint'
+            || target.id == 's_method_'+carrier+'_bpost_clickcollect'
+        ) {
             if(this.selectedspot !== false) {
                 $(target).up().insert({'after': $("bpostDelivery")});
                 $("bpostDelivery").style.display = 'block';
@@ -369,7 +396,10 @@ Bpost.ShM = Class.create({
         if(this.settings.datepicker_display) {
             var currMethod = activeOption.replace('s_method_'+carrier+'_', '');
 
-            if(currMethod == 'bpost_homedelivery' || currMethod == 'bpost_pickuppoint' || currMethod == 'bpost_parcellocker') {
+            if(currMethod == 'bpost_homedelivery' ||
+                currMethod == 'bpost_pickuppoint' ||
+                currMethod == 'bpost_parcellocker' ||
+                currMethod == 'bpost_clickcollect') {
                 this.showDates(target);
                 this.placeDates(this.settings.datepicker_days, currMethod);
             }
@@ -409,9 +439,13 @@ Bpost.ShM = Class.create({
             onSuccess: function (transport) {
                 var json = transport.responseText.evalJSON(true);
                 if (json.error.length == 0) {
-                    //this method only applies to the pick-up points (nothing else can be closed on saturday)
-                    var currMethod = 'bpost_pickuppoint';
-                    this.placeDates(json.dates, currMethod);
+                    //this method only applies to the pick-up points & clickcollect
+                    // (nothing else can be closed on saturday)
+                    var currMethod = $$('input:checked[type="radio"][name="shipping_method"]').pluck('value');
+                    currMethod = currMethod[0].replace('bpostshm_', '');
+                    if(currMethod == 'bpost_pickuppoint' || currMethod == 'bpost_clickcollect') {
+                        this.placeDates(json.dates, currMethod);
+                    }
 
                 } else {
                     alert(json.error);
@@ -491,7 +525,7 @@ Bpost.ShM = Class.create({
         this.selectedspot = json.Id;
 
         // create notification html
-        if(activeOption == "s_method_"+carrier+"_bpost_pickuppoint"){
+        if(activeOption == "s_method_"+carrier+"_bpost_pickuppoint" || activeOption == "s_method_"+carrier+"_bpost_clickcollect"){
             $("notifications-pick-up-point").style.display = "block";
             $("pickup-point-notification-email").checked = true;
             $("pickup-point-notification-sms").checked = false;
@@ -527,7 +561,11 @@ Bpost.ShM = Class.create({
                 $("selectPickupPoint").setAttribute("type", 3)
                 $("selectPickupPoint").update(this.settings.change_text);
 
-            }else{
+            }else if(activeOption == "s_method_"+carrier+"_bpost_clickcollect"){
+                $("selectPickupPoint").setAttribute("type", 8)
+                $("selectPickupPoint").update(this.settings.change_text_clickcollect);
+            }
+            else{
                 //change link text
                 $("selectPickupPoint").setAttribute("type", 4)
                 $("selectPickupPoint").update(this.settings.change_text_parcel_locker);
@@ -632,7 +670,6 @@ Bpost.ShM = Class.create({
         parameters['id'] = id;
         parameters['type'] = type;
         parameters['spots'] = spots;
-
         new Ajax.Request(this.settings.base_url + 'bpost/ajax/gethours', {
             method: 'post',
             parameters: parameters,
@@ -773,7 +810,8 @@ Bpost.ShM = Class.create({
                     1 : this.imageOpenPostOffice,
                     2 : this.imageOpenPostPoint,
                     3 : this.imageOpenPostOffice, //bpost should never return 3
-                    4 : this.imageOpenParcelLocker
+                    4 : this.imageOpenParcelLocker,
+                    8 : this.imageOpenClickCollect
                 }
 
                 //google maps marker
@@ -796,7 +834,7 @@ Bpost.ShM = Class.create({
                 $$('ul.list').first().insert("<li class='shoplistitem' id='" + this.json.poilist.Poi[i].Record.Id + "'>" + "<span class='title'>" + this.json.poilist.Poi[i].Record.Name + "</span>" + "<span class='address'>" + this.json.poilist.Poi[i].Record.Street + " " + this.json.poilist.Poi[i].Record.Number + "</span>" + "<span class='city'>" + this.json.poilist.Poi[i].Record.Zip + " " + this.json.poilist.Poi[i].Record.City + "</span><a href='#' data-shopid='" + this.json.poilist.Poi[i].Record.Id + "' class='selectspot' >" + this.settings.label_select + " &raquo;</a></li>");
             }
             var pointType = $("selectPickupPoint").getAttribute("type");
-            if(spots.length > 0 && pointType == 3) {
+            if(spots.length > 0 && (pointType == 3 || pointType == 8)) {
                 spots = JSON.stringify(spots);
                 this.generateHours(false, false, true, spots);
             }

@@ -148,6 +148,6 @@ class Bpost_ShM_Adminhtml_Bpost_ShM_ConfigController extends Mage_Adminhtml_Cont
      */
     protected function _isAllowed()
     {
-        return Mage::getSingleton('admin/session')->isAllowed('system/config_bpost_shm');
+        return Mage::getSingleton('admin/session')->isAllowed('system/config/bpost_shm');
     }
 }
