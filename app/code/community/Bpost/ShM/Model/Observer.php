@@ -69,14 +69,14 @@ class Bpost_ShM_Model_Observer extends Varien_Event_Observer
             $observer->getEvent()->getName() == "controller_action_postdispatch_checkout_onepage_saveBilling") ||
             $observer->getEvent()->getName() == "controller_action_postdispatch_checkout_onepage_saveShipping") {
 
-            $bpostOriginalShippingAddress = new Varien_Object();
+            $originalAddress = new Varien_Object();
             $street = $shippingAddress->getStreet(1);
 
             if($shippingAddress->getStreet(2) && $shippingAddress->getStreet(2) != ""){
                 $street .= "\n" . $shippingAddress->getStreet(2);
             }
 
-            $bpostOriginalShippingAddress
+            $originalAddress
                 ->setFirstname($shippingAddress->getFirstname())
                 ->setLastname($shippingAddress->getLastname())
                 ->setCompany($shippingAddress->getCompany())
@@ -89,10 +89,10 @@ class Bpost_ShM_Model_Observer extends Varien_Event_Observer
                 ->setFax($shippingAddress->getFax());
 
             if($shippingAddress->getAddressId() != "" && $shippingAddress->hasAddressId()){
-                $bpostOriginalShippingAddress->setAddressId($shippingAddress->getAddressId());
+                $originalAddress->setAddressId($shippingAddress->getAddressId());
             }
 
-            $checkoutSession->setBpostOriginalShippingAddress($bpostOriginalShippingAddress);
+            $checkoutSession->setBpostOriginalShippingAddress($originalAddress);
         }
         return $this;
     }
@@ -100,10 +100,9 @@ class Bpost_ShM_Model_Observer extends Varien_Event_Observer
     /**
      * Reset saturday delivery option so rate calculation doesn't show saturday incl. shipping rates
      *
-     * @param $observer
      * @return $this
      */
-    public function controller_action_predispatch_checkout_onepage_saveAddress($observer)
+    public function controller_action_predispatch_checkout_onepage_saveAddress()
     {
         $checkoutSession = Mage::getSingleton('checkout/session');
         //always reset the saturday delivery option so we don't see multiplied rates
@@ -115,10 +114,9 @@ class Bpost_ShM_Model_Observer extends Varien_Event_Observer
     /**
      * Change shipping address if needed, save previous shipping method, add progress bar reload flag.
      *
-     * @param $observer
      * @return $this
      */
-    public function checkout_controller_onepage_save_shipping_method($observer)
+    public function checkout_controller_onepage_save_shipping_method()
     {
         //init all necessary data
         $checkoutSession = Mage::getSingleton('checkout/session');
@@ -258,9 +256,9 @@ class Bpost_ShM_Model_Observer extends Varien_Event_Observer
 
         //function checks if manage labels with Magento is disabled
         //if so, we need to call the create order api function
-        $manageLabelsWithMagento = $configHelper->getBpostShippingConfig("manage_labels_with_magento");
+        $manageLabels = $configHelper->getBpostShippingConfig("manage_labels_with_magento");
 
-        if(!$manageLabelsWithMagento){
+        if(!$manageLabels){
             $apiModel = Mage::getModel("bpost_shm/api", true);
             $apiModel->createOrder($order);
             $order->setBpostReference($order->getIncrementId())->save();
@@ -274,7 +272,7 @@ class Bpost_ShM_Model_Observer extends Varien_Event_Observer
      * function sets default data on our quote
      * we need to do this for the onestepcheckout
      */
-    public function sales_quote_collect_totals_before($observer){
+    public function sales_quote_collect_totals_before(){
         $checkoutSession = Mage::getSingleton('checkout/session');
         $quote = $checkoutSession->getQuote();
         $params = Mage::app()->getRequest()->getParams();
@@ -283,36 +281,29 @@ class Bpost_ShM_Model_Observer extends Varien_Event_Observer
         if(isset($params["shipping_method"]) && $originalRatePrices){
             $bpostConfigHelper = Mage::helper("bpost_shm/system_config");
             $bpostHelper = Mage::helper("bpost_shm");
-            $shippingMethodForConfig = str_replace('bpostshm_', '', $params["shipping_method"]);
-            $groups = $quote->getShippingAddress()->getGroupedAllShippingRates();
-            foreach ($groups as $code => $_rates){
-                foreach ($_rates as $_rate){
+            $shippingMethod = str_replace('bpostshm_', '', $params["shipping_method"]);
 
-                    if($_rate->getCode() == $params["shipping_method"] && isset($originalRatePrices[$params["shipping_method"]])){
-                        $saturdayDeliveryCost = $bpostHelper->formatSaturdayDeliveryCost($bpostConfigHelper->getBpostShippingConfig("saturday_delivery_cost", Mage::app()->getStore()->getId()));
+            foreach($quote->getShippingAddress()->getShippingRatesCollection() as $_rate){
+                if($_rate->getCode() == $params["shipping_method"] && isset($originalRatePrices[$params["shipping_method"]])){
+                    $saturdayDeliveryCost = $bpostHelper->formatSaturdayDeliveryCost($bpostConfigHelper->getBpostShippingConfig("saturday_delivery_cost", Mage::app()->getStore()->getId()));
 
-                        if(isset($params["disable_saturday_delivery"]) && $params["disable_saturday_delivery"] == 1  && Mage::helper("bpost_shm/system_config")->getBpostShippingConfig("display_delivery_date")){
-                            //check if the option saturday delivery is active for the current shipping method
-                            if($bpostConfigHelper->getBpostCarriersConfig("saturday_delivery", $shippingMethodForConfig, Mage::app()->getStore()->getId())){
-                                //remove extra cost
-                                $_rate->setPrice($originalRatePrices[$params["shipping_method"]]);
-                                $_rate->setSaturdayDelivery(0);
-                                $quote->setBpostDisableSaturdayDelivery(true);
-                                $quote->setBpostSaturdayCostApplied(false);
-                            }
-
-                        }elseif(isset($params["disable_saturday_delivery"]) && $params["disable_saturday_delivery"] == 0  && Mage::helper("bpost_shm/system_config")->getBpostShippingConfig("display_delivery_date")){
-                                //add extra cost
-                            if($bpostConfigHelper->getBpostCarriersConfig("saturday_delivery", $shippingMethodForConfig, Mage::app()->getStore()->getId())){
-                                $_rate->setPrice($originalRatePrices[$params["shipping_method"]]+$saturdayDeliveryCost);
-                                $_rate->setSaturdayDelivery(1);
-                                //make sure the original prices are applied
-                                $quote->setBpostDisableSaturdayDelivery(false);
-                                $quote->setBpostSaturdayCostApplied(true);
-                            }
+                    if(isset($params["disable_saturday_delivery"]) && $params["disable_saturday_delivery"] == 1  && Mage::helper("bpost_shm/system_config")->getBpostShippingConfig("display_delivery_date")){
+                        //check if the option saturday delivery is active for the current shipping method
+                        if($bpostConfigHelper->getBpostCarriersConfig("saturday_delivery", $shippingMethod, Mage::app()->getStore()->getId())){
+                            //remove extra cost
+                            $_rate->setPrice($originalRatePrices[$params["shipping_method"]]);
+                            $_rate->setSaturdayDelivery(0);
+                            $quote->setBpostDisableSaturdayDelivery(true);
                         }
 
-                        $_rate->save();
+                    }elseif(isset($params["disable_saturday_delivery"]) && $params["disable_saturday_delivery"] == 0  && Mage::helper("bpost_shm/system_config")->getBpostShippingConfig("display_delivery_date")){
+                        //add extra cost
+                        if($bpostConfigHelper->getBpostCarriersConfig("saturday_delivery", $shippingMethod, Mage::app()->getStore()->getId())){
+                            $_rate->setPrice($originalRatePrices[$params["shipping_method"]]+$saturdayDeliveryCost);
+                            $_rate->setSaturdayDelivery(1);
+                            //make sure the original prices are applied
+                            $quote->setBpostDisableSaturdayDelivery(false);
+                        }
                     }
                 }
             }
@@ -331,9 +322,9 @@ class Bpost_ShM_Model_Observer extends Varien_Event_Observer
                 }
 
                 if(!$quote->getBpostNotificationSms()){
-                    $currentPrimaryShipping = $customer->getPrimaryShippingAddress();
-                    if(is_object($currentPrimaryShipping)){
-                        $telephone = $currentPrimaryShipping->getTelephone();
+                    $primaryShipping = $customer->getPrimaryShippingAddress();
+                    if(is_object($primaryShipping)){
+                        $telephone = $primaryShipping->getTelephone();
                         $quote->getShippingAddress()->setTelephone($telephone);
                     }
                 }
@@ -343,10 +334,8 @@ class Bpost_ShM_Model_Observer extends Varien_Event_Observer
         return $this;
     }
 
-    /**
-     * @param $observer
-     */
-    public function controller_action_predispatch_onestepcheckout_index_index($observer){
+
+    public function controller_action_predispatch_onestepcheckout_index_index(){
         $checkoutSession = Mage::getSingleton('checkout/session');
         $quote = $checkoutSession->getQuote();
         $shippingMethod = str_replace("bpostshm_", "",$quote->getShippingAddress()->getShippingMethod());

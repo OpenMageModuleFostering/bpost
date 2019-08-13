@@ -38,7 +38,6 @@ class Bpost_ShM_Block_Adminhtml_Sales_Grid extends Mage_Adminhtml_Block_Widget_G
     protected function _prepareColumns()
     {
         $helper = Mage::helper('bpost_shm');
-
         $this->addColumn('real_order_id', array(
             'header' => $helper->__('Order #'),
             'width' => '80px',
@@ -46,7 +45,6 @@ class Bpost_ShM_Block_Adminhtml_Sales_Grid extends Mage_Adminhtml_Block_Widget_G
             'index' => 'increment_id',
             'filter_index' => 'main_table.increment_id'
         ));
-
         if (!Mage::app()->isSingleStoreMode()) {
             $this->addColumn('store_id', array(
                 'header' => $helper->__('Purchased From (Store)'),
@@ -64,19 +62,16 @@ class Bpost_ShM_Block_Adminhtml_Sales_Grid extends Mage_Adminhtml_Block_Widget_G
             'width' => '100px',
             'filter_index' => 'main_table.created_at'
         ));
-
         $this->addColumn('billing_name', array(
             'header' => $helper->__('Bill to Name'),
             'index' => 'billing_name',
             'filter_index' => 'main_table.billing_name'
         ));
-
         $this->addColumn('shipping_name', array(
             'header' => $helper->__('Ship to Name'),
             'index' => 'shipping_customer_name',
             'filter_condition_callback' => array($this, '_shippingNameFilter'),
         ));
-
         $this->addColumn('grand_total', array(
             'header' => $helper->__('G.T. (Purchased)'),
             'index' => 'grand_total',
@@ -84,14 +79,12 @@ class Bpost_ShM_Block_Adminhtml_Sales_Grid extends Mage_Adminhtml_Block_Widget_G
             'currency' => 'order_currency_code',
             'filter_index' => 'main_table.grand_total'
         ));
-
         $this->addColumn('total_qty_ordered', array(
             'header' => $helper->__('# of Items'),
             'type' => 'int',
             'index' => 'total_qty_ordered',
             'width' => '100px',
         ));
-
         $this->addColumn('status', array(
             'header' => $helper->__('Status'),
             'index' => 'status',
@@ -100,14 +93,12 @@ class Bpost_ShM_Block_Adminhtml_Sales_Grid extends Mage_Adminhtml_Block_Widget_G
             'options' => Mage::getSingleton('sales/order_config')->getStatuses(),
             'filter_index' => 'main_table.status'
         ));
-
         $this->addColumn('bpost_status', array(
             'header' => $helper->__('bpost status'),
             'index' => 'bpost_status',
             'type' => 'text',
             'width' => '100px'
         ));
-
         $this->addColumn('bpost_label_exists', array(
             'header' => $helper->__('Label download'),
             'index' => 'bpost_label_exists',
@@ -117,7 +108,6 @@ class Bpost_ShM_Block_Adminhtml_Sales_Grid extends Mage_Adminhtml_Block_Widget_G
             'options' => array('1' => 'Yes', '0' => 'No'),
             'filter_index' => 'sfo.bpost_label_exists'
         ));
-
         if (Mage::getStoreConfig('shipping/bpost_shm/display_delivery_date')) {
             $this->addColumn('bpost_drop_date', array(
                 'header' => $helper->__('Drop date'),
@@ -127,7 +117,6 @@ class Bpost_ShM_Block_Adminhtml_Sales_Grid extends Mage_Adminhtml_Block_Widget_G
                 'renderer' => 'bpost_shm/adminhtml_sales_grid_renderer_dropdate_dateformat'
             ));
         }
-
         if (Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/view')) {
             $this->addColumn('action',
                 array(
@@ -148,7 +137,6 @@ class Bpost_ShM_Block_Adminhtml_Sales_Grid extends Mage_Adminhtml_Block_Widget_G
                     'is_system' => true,
                 ));
         }
-
         return parent::_prepareColumns();
     }
 
@@ -192,7 +180,7 @@ class Bpost_ShM_Block_Adminhtml_Sales_Grid extends Mage_Adminhtml_Block_Widget_G
      */
     protected function _prepareMassactionBlock()
     {
-        $massActionJsObjectName = $this->getHtmlId()."_massactionJsObject";
+        $massActionJsName = $this->getHtmlId()."_massactionJsObject";
         $gridJsObjectName = $this->getHtmlId()."JsObject";
         $massActionBlock = $this->getLayout()->createBlock($this->getMassactionBlockName());
 
@@ -200,7 +188,7 @@ class Bpost_ShM_Block_Adminhtml_Sales_Grid extends Mage_Adminhtml_Block_Widget_G
             ->createBlock('adminhtml/widget_button')
             ->setData(array(
                 'label'     => Mage::helper('bpost_shm')->__('Submit'),
-                'onclick'   => "generateAndComplete('".$massActionJsObjectName."','".$gridJsObjectName."')",
+                'onclick'   => "generateAndComplete('".$massActionJsName."','".$gridJsObjectName."')",
             ))->toHtml();
 
         $this->setChild('massaction', $massActionBlock
@@ -230,7 +218,7 @@ class Bpost_ShM_Block_Adminhtml_Sales_Grid extends Mage_Adminhtml_Block_Widget_G
             return $this;
         }
 
-        $this->getCollection()->getSelect()->where(
+        $collection->getSelect()->where(
             "IF(shipping_method='bpostshm_bpost_international', CONCAT('International: ', shipping_name), shipping_name) like ?"
             , "%$value%"
         );

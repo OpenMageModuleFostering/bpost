@@ -12,11 +12,12 @@ get_separate_save_methods_function = function get_separate_save_methods_function
 triggerAjaxCallGetSeparateSaveMethods = function (url, update_payments){
     var form = $('onestepcheckout-form');
     var shipping_method = $RF(form, 'shipping_method');
-    if( window.bpostSettings){
-    var shippingmethodDate = window.bpostSettings.datepicker_days[shipping_method.replace('bpostshm_', '')]['date'];
-    var currentDate = new Date(shippingmethodDate);
-    var currentDay = currentDate.getDay();
-    var saturdayDelivery = 0;
+
+    if( window.bpostSettings && shipping_method){
+        var shippingmethodDate = window.bpostSettings.datepicker_days[shipping_method.replace('bpostshm_', '')]['date'];
+        var currentDate = new Date(shippingmethodDate);
+        var currentDay = currentDate.getDay();
+        var saturdayDelivery = 0;
     }
     else{
         currentDay = "";

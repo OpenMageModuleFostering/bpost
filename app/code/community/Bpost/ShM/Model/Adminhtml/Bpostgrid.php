@@ -28,17 +28,17 @@ class Bpost_ShM_Model_Adminhtml_Bpostgrid extends Varien_Event_Observer
         $collectionCount = $shipmentCollection->count();
         $shipment = false;
 
-        $retryAutomatedShipment = false;
+        $retryAutoShipment = false;
         if ($collectionCount == 1 && $shipmentCollection->getFirstItem()->getBpostShipmentAutomated() == 1) {
-            $retryAutomatedShipment = true;
+            $retryAutoShipment = true;
         }
 
-        if ($collectionCount > 0 && !$order->getBpostLabelExists() && !$retryAutomatedShipment) {
+        if ($collectionCount > 0 && !$order->getBpostLabelExists() && !$retryAutoShipment) {
             return $this->_processAvailableShipments($order);
 
         } elseif (!$order->getBpostLabelExists()) {
 
-            if ($retryAutomatedShipment) {
+            if ($retryAutoShipment) {
                 $shipment = $shipmentCollection->getFirstItem();
             }
             return $this->_createBpostShipment($order, $shipment);
@@ -269,10 +269,10 @@ class Bpost_ShM_Model_Adminhtml_Bpostgrid extends Varien_Event_Observer
         $pdfName = null;
 
         $webserviceModel = Mage::getModel("bpost_shm/api", true);
-        $responseLabelWebserviceCallback = $webserviceModel->createLabelByOrder($order, $this->_addReturnLabels);
+        $response = $webserviceModel->createLabelByOrder($order, $this->_addReturnLabels);
 
-        if ($responseLabelWebserviceCallback) {
-            $parsedResponse = $bpostHelper->parseLabelApiResponse($responseLabelWebserviceCallback, $order);
+        if ($response) {
+            $parsedResponse = $bpostHelper->parseLabelApiResponse($response, $order);
 
             if (empty($parsedResponse) || !isset($parsedResponse["pdfString"])) {
                 $message = $bpostHelper->__("No label response received for Magento order #%s.", $order->getIncrementId());
@@ -348,7 +348,10 @@ class Bpost_ShM_Model_Adminhtml_Bpostgrid extends Varien_Event_Observer
         $labelPdfArray = array();
         $i = 0;
 
-        $orderCollection = Mage::getModel("sales/order")->getCollection()->addFieldToFilter("entity_id", array("in" => $orderIds));
+        $orderCollection = Mage::getModel("sales/order")->getCollection()
+        ->addFieldToFilter("entity_id", array("in" => $orderIds));
+
+        $exportedOrderIds = array();
 
         foreach ($orderCollection as $order) {
             $exported = false;
@@ -373,17 +376,21 @@ class Bpost_ShM_Model_Adminhtml_Bpostgrid extends Varien_Event_Observer
                     }
 
                     if ($exported) {
-                        $shippingCollection->setDataToAll("bpost_label_exported", true);
+                        $exportedOrderIds[] = $order->getId();
                         $order->setBpostLabelExported(true);
                     }
-
-                    $shippingCollection->save();
-                    $order->save();
                 }
             } else {
                 $i++;
             }
         }
+
+        $orderCollection->save();
+
+        //we save data to all shipments, performance change
+        $shippingCollection = Mage::getModel('sales/order_shipment')->getCollection();
+        $shippingCollection->addFieldToFilter("order_id", array("in" => $exportedOrderIds));
+        $shippingCollection->setDataToAll("bpost_label_exported", true)->save();
 
         if (!count($labelPdfArray)) {
             return false;
@@ -393,12 +400,12 @@ class Bpost_ShM_Model_Adminhtml_Bpostgrid extends Varien_Event_Observer
             Mage::getSingleton('core/session')->addNotice($message);
         }
 
-        $generated_name = date("Y_m_d_H_i_s") . "_undownloaded.zip";
+        $generatedName = date("Y_m_d_H_i_s") . "_undownloaded.zip";
 
         $file = new Varien_Io_File();
         $file->checkAndCreateFolder(Mage::getBaseDir('media') . self::MEDIA_LABEL_PATH . "zips/");
 
-        return $this->_zipLabelPdfArray($labelPdfArray, $generated_name, true, true);
+        return $this->_zipLabelPdfArray($labelPdfArray, $generatedName, true, true);
     }
 
 
@@ -406,13 +413,13 @@ class Bpost_ShM_Model_Adminhtml_Bpostgrid extends Varien_Event_Observer
      * Zips the labels.
      *
      * @param array $files
-     * @param string $generated_name
+     * @param string $generatedName
      * @param bool $overwrite
      * @return bool|string
      */
-    protected function _zipLabelPdfArray($files = array(), $generated_name = '', $overwrite = false, $mergePdfFiles = false)
+    protected function _zipLabelPdfArray($files = array(), $generatedName = '', $overwrite = false, $mergePdfFiles = false)
     {
-        $destination = Mage::getBaseDir('media') . self::MEDIA_LABEL_PATH . "zips/" . $generated_name;
+        $destination = Mage::getBaseDir('media') . self::MEDIA_LABEL_PATH . "zips/" . $generatedName;
         $varienFile = new Varien_Io_File();
         $bpostHelper = Mage::helper("bpost_shm");
 
@@ -421,13 +428,13 @@ class Bpost_ShM_Model_Adminhtml_Bpostgrid extends Varien_Event_Observer
             return false;
         }
 
-        $valid_files = array();
+        $validFiles = array();
         $pdfMerged = new Zend_Pdf();
 
         if (is_array($files)) {
             foreach ($files as $file) {
                 if ($varienFile->fileExists($file)) {
-                    $valid_files[] = $file;
+                    $validFiles[] = $file;
 
                     if ($mergePdfFiles) {
                         $tmpPdf = Zend_Pdf::load($file);
@@ -445,11 +452,11 @@ class Bpost_ShM_Model_Adminhtml_Bpostgrid extends Varien_Event_Observer
                 $mergedPdfName = $mergedPdfName . ".pdf";
 
                 if ($mergedPdfName) {
-                    $valid_files = array($mergedPdfName);
+                    $validFiles = array($mergedPdfName);
                 }
             }
 
-            $validFilesCount = count($valid_files);
+            $validFilesCount = count($validFiles);
             if ($validFilesCount && $validFilesCount > 1) {
                 $zip = new ZipArchive();
 
@@ -457,20 +464,20 @@ class Bpost_ShM_Model_Adminhtml_Bpostgrid extends Varien_Event_Observer
                     return false;
                 }
 
-                foreach ($valid_files as $file) {
+                foreach ($validFiles as $file) {
                     $fileName = $bpostHelper->getFileNameByPath($file);
                     $zip->addFile($file, $fileName);
                 }
 
                 $zip->close();
-                return $generated_name;
+                return $generatedName;
             } elseif ($validFilesCount) {
                 //we return the pdf path instead of creating a zip file
-                $pdfName = $valid_files[0];
+                $pdfName = $validFiles[0];
                 return $pdfName;
             }
-
-            return false;
         }
+
+        return false;
     }
 }

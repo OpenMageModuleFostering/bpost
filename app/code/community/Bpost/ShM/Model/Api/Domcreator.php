@@ -5,9 +5,9 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
     protected $_xmlnsValue = "http://schema.post.be/shm/deepintegration/v3/national";
     protected $_xmlnsCommonValue = "http://schema.post.be/shm/deepintegration/v3/common";
     protected $_xmlnsTnsValue = "http://schema.post.be/shm/deepintegration/v3/";
-    protected $_xmlnsInternationalValue = "http://schema.post.be/shm/deepintegration/v3/international";
+    protected $_xmlnsInternational = "http://schema.post.be/shm/deepintegration/v3/international";
     protected $_xmlnsXsiValue = "http://www.w3.org/2001/XMLSchema-instance";
-    protected $_xsiSchemaLocationValue = "http://schema.post.be/shm/deepintegration/v3/";
+    protected $_xsiSchemaLocation = "http://schema.post.be/shm/deepintegration/v3/";
 
     protected $_shippingAddress;
     protected $_billingAddress;
@@ -71,21 +71,21 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
         $xmlnsTnsAttribute = $document->createAttribute("xmlns:tns");
         $xmlnsTnsAttribute->value = $this->_xmlnsTnsValue;
 
-        $xmlnsInternationalAttribute = $document->createAttribute("xmlns:international");
-        $xmlnsInternationalAttribute->value = $this->_xmlnsInternationalValue;
+        $xmlnsIAttribute = $document->createAttribute("xmlns:international");
+        $xmlnsIAttribute->value = $this->_xmlnsInternational;
 
         $xmlnsXsiAttribute = $document->createAttribute("xmlns:xsi");
         $xmlnsXsiAttribute->value = $this->_xmlnsXsiValue;
 
-        $xsiSchemaLocationValue = $document->createAttribute("xsi:schemaLocation");
-        $xsiSchemaLocationValue->value = $this->_xsiSchemaLocationValue;
+        $xsiSchemaLocation = $document->createAttribute("xsi:schemaLocation");
+        $xsiSchemaLocation->value = $this->_xsiSchemaLocation;
 
         $orderElement->appendChild($xmlnsAttribute);
         $orderElement->appendChild($xmlnsCommonAttribute);
         $orderElement->appendChild($xmlnsTnsAttribute);
-        $orderElement->appendChild($xmlnsInternationalAttribute);
+        $orderElement->appendChild($xmlnsIAttribute);
         $orderElement->appendChild($xmlnsXsiAttribute);
-        $orderElement->appendChild($xsiSchemaLocationValue);
+        $orderElement->appendChild($xsiSchemaLocation);
         //end adding order attributes
 
         $document->appendChild($orderElement);
@@ -200,16 +200,16 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
             $nationalBoxElements = $this->_getNationalBoxElements($document, $order, $returnOrder, $weightInGrams, $shippingMethod);
             $box->appendChild($nationalBoxElements);
         }else{
-            $internationalBoxElements = $this->_getInternationalBoxElements($document, $order, $returnOrder, $weightInGrams);
-            $box->appendChild($internationalBoxElements);
+            $internationalElements = $this->_getInternationalBoxElements($document, $order, $returnOrder, $weightInGrams);
+            $box->appendChild($internationalElements);
         }
 
-        //we do the same for additionalCustomerReference
+        //we do the same for additionalCustomerRef
         //Free text. If not submitted, it will indicate the channel used for creating this order. Best used by integrators to indicate the origin of the order.
 
-        $additionalCustomerReference = $document->createElement('tns:additionalCustomerReference');
-        $additionalCustomerReference->appendChild($document->createTextNode("Magento_".Mage::getVersion()));
-        $box->appendChild($additionalCustomerReference);
+        $additionalCustomerRef = $document->createElement('tns:additionalCustomerReference');
+        $additionalCustomerRef->appendChild($document->createTextNode("Magento_".Mage::getVersion()));
+        $box->appendChild($additionalCustomerRef);
 
         //finally we add the box element to the order element
         $orderElement->appendChild($box);
@@ -223,14 +223,15 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
         $bpostHelper = Mage::helper("bpost_shm");
         $configHelper = Mage::helper("bpost_shm/system_config");
         $nationalBox = $document->createElement('tns:nationalBox');
-        $manageLabelsWithMagento = $configHelper->getBpostShippingConfig("manage_labels_with_magento");
+        $manageLabels = $configHelper->getBpostShippingConfig("manage_labels_with_magento");
 
-        $requestedDeliveryDate = false;
+        $reqDeliveryDate = false;
         $dropDate = new DateTime($order->getBpostDeliveryDate());
         $currentDate = new DateTime();
-        if($dropDate && $dropDate > $currentDate) {
-            $requestedDeliveryDate = $document->createElement('requestedDeliveryDate');
-            $requestedDeliveryDate->appendChild($document->createTextNode($order->getBpostDeliveryDate()));
+
+        if($dropDate && $dropDate > $currentDate && !$returnOrder) {
+            $reqDeliveryDate = $document->createElement('requestedDeliveryDate');
+            $reqDeliveryDate->appendChild($document->createTextNode($order->getBpostDeliveryDate()));
         }
 
         //add product
@@ -328,8 +329,8 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
                 $atHome->appendChild($weight);
                 $atHome->appendChild($receiver);
 
-                if($requestedDeliveryDate){
-                    $atHome->appendChild($requestedDeliveryDate);
+                if($reqDeliveryDate){
+                    $atHome->appendChild($reqDeliveryDate);
                 }
 
                 $nationalBox->appendChild($atHome);
@@ -338,7 +339,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
             case "bpostshm_bpost_pickuppoint":
                 if(!$order->getBpostPickuplocationId()){
                     //only throw error in backend
-                    if($manageLabelsWithMagento){
+                    if($manageLabels){
                         Mage::throwException("No pickup location order data found.");
                     }
                 }
@@ -359,7 +360,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
                 $options = $this->_checkIfOptionIsValid($document, $options, $order, "bpost_pickuppoint", "insurance", "insured");
                 $options = $this->_checkIfOptionIsValid($document, $options, $order, "bpost_pickuppoint", "saturday_delivery", "saturdayDelivery");
 
-                $formattedShippingAddress = $bpostHelper->formatShippingAddress($this->_shippingAddress);
+                $formattedAddress = $bpostHelper->formatShippingAddress($this->_shippingAddress);
 
                 $pugoId = $document->createElement('pugoId');
                 $pugoId->appendChild($document->createTextNode($order->getBpostPickuplocationId()));
@@ -368,11 +369,11 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
                 $pugoName->appendChild($document->createTextNode($this->_shippingAddress->getLastname()));
 
                 //Address tags
-                $streetName->appendChild($document->createTextNode($formattedShippingAddress["street"]));
-                $streetNumber->appendChild($document->createTextNode($formattedShippingAddress["number"]));
+                $streetName->appendChild($document->createTextNode($formattedAddress["street"]));
+                $streetNumber->appendChild($document->createTextNode($formattedAddress["number"]));
 
-                $streetPostalCode->appendChild($document->createTextNode($formattedShippingAddress["postcode"]));
-                $locality->appendChild($document->createTextNode($formattedShippingAddress["city"]));
+                $streetPostalCode->appendChild($document->createTextNode($formattedAddress["postcode"]));
+                $locality->appendChild($document->createTextNode($formattedAddress["city"]));
                 $countryCode->appendChild($document->createTextNode($this->_shippingAddress->getCountryId()));
 
                 $pugoAddress = $document->createElement('pugoAddress');
@@ -397,8 +398,8 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
                 $atBpost->appendChild($receiverName);
                 $atBpost->appendChild($receiverCompany);
 
-                if($requestedDeliveryDate) {
-                    $atBpost->appendChild($requestedDeliveryDate);
+                if($reqDeliveryDate) {
+                    $atBpost->appendChild($reqDeliveryDate);
                 }
 
                 $nationalBox->appendChild($atBpost);
@@ -407,7 +408,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
 
             case "bpostshm_bpost_parcellocker":
 
-                if(!$order->getBpostPickuplocationId() && $manageLabelsWithMagento){
+                if(!$order->getBpostPickuplocationId() && $manageLabels){
                         Mage::throwException("No parcel locker data found.");
                 }
 
@@ -417,7 +418,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
                 $options = $this->_checkIfOptionIsValid($document, $options, $order, "bpost_parcellocker", "insurance", "insured");
                 $options = $this->_checkIfOptionIsValid($document, $options, $order, "bpost_parcellocker", "saturday_delivery", "saturdayDelivery");
 
-                $formattedShippingAddress = $bpostHelper->formatShippingAddress($this->_shippingAddress);
+                $formattedAddress = $bpostHelper->formatShippingAddress($this->_shippingAddress);
 
                 $parcelsDepotId = $document->createElement('parcelsDepotId');
                 $parcelsDepotId->appendChild($document->createTextNode($order->getBpostPickuplocationId()));
@@ -426,11 +427,11 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
                 $parcelsDepotName->appendChild($document->createTextNode($this->_shippingAddress->getLastname()));
 
                 //Address tags
-                $streetName->appendChild($document->createTextNode($formattedShippingAddress["street"]));
-                $streetNumber->appendChild($document->createTextNode($formattedShippingAddress["number"]));
+                $streetName->appendChild($document->createTextNode($formattedAddress["street"]));
+                $streetNumber->appendChild($document->createTextNode($formattedAddress["number"]));
 
-                $streetPostalCode->appendChild($document->createTextNode($formattedShippingAddress["postcode"]));
-                $locality->appendChild($document->createTextNode($formattedShippingAddress["city"]));
+                $streetPostalCode->appendChild($document->createTextNode($formattedAddress["postcode"]));
+                $locality->appendChild($document->createTextNode($formattedAddress["city"]));
                 $countryCode->appendChild($document->createTextNode($this->_shippingAddress->getCountryId()));
 
                 $parcelsDepotAddress = $document->createElement('parcelsDepotAddress');
@@ -471,29 +472,29 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
                 }
                 //end unregistered element
 
-                $at247 = $document->createElement('at24-7');
-                $at247->appendChild($product);
+                $atTwentyFourSeven = $document->createElement('at24-7');
+                $atTwentyFourSeven->appendChild($product);
 
                 if($options->hasChildNodes()){
-                    $at247->appendChild($options);
+                    $atTwentyFourSeven->appendChild($options);
                 }
 
 
-                $at247->appendChild($weight);
-                $at247->appendChild($parcelsDepotId);
-                $at247->appendChild($parcelsDepotName);
-                $at247->appendChild($parcelsDepotAddress);
+                $atTwentyFourSeven->appendChild($weight);
+                $atTwentyFourSeven->appendChild($parcelsDepotId);
+                $atTwentyFourSeven->appendChild($parcelsDepotName);
+                $atTwentyFourSeven->appendChild($parcelsDepotAddress);
 
                 //add unregistered element
-                $at247->appendChild($unregistered);
-                $at247->appendChild($receiverName);
-                $at247->appendChild($receiverCompany);
+                $atTwentyFourSeven->appendChild($unregistered);
+                $atTwentyFourSeven->appendChild($receiverName);
+                $atTwentyFourSeven->appendChild($receiverCompany);
 
-                if($requestedDeliveryDate) {
-                    $at247->appendChild($requestedDeliveryDate);
+                if($reqDeliveryDate) {
+                    $atTwentyFourSeven->appendChild($reqDeliveryDate);
                 }
 
-                $nationalBox->appendChild($at247);
+                $nationalBox->appendChild($atTwentyFourSeven);
                 break;
         }
         return $nationalBox;
@@ -600,8 +601,8 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
         $shipmentType = $document->createElement('international:shipmentType');
         $shipmentType->appendChild($document->createTextNode("OTHER"));
 
-        $parcelReturnInstructions = $document->createElement('international:parcelReturnInstructions');
-        $parcelReturnInstructions->appendChild($document->createTextNode("RTS"));
+        $returnInstructions = $document->createElement('international:parcelReturnInstructions');
+        $returnInstructions->appendChild($document->createTextNode("RTS"));
 
         $privateAddress = $document->createElement('international:privateAddress');
         $privateAddress->appendChild($document->createTextNode("false"));
@@ -609,7 +610,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
         $customsInfo->appendChild($parcelValue);
         $customsInfo->appendChild($contentDescription);
         $customsInfo->appendChild($shipmentType);
-        $customsInfo->appendChild($parcelReturnInstructions);
+        $customsInfo->appendChild($returnInstructions);
         $customsInfo->appendChild($privateAddress);
         //end customsInfo element
 

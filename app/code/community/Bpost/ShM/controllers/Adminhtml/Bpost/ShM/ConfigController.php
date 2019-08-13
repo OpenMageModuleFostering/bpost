@@ -96,15 +96,22 @@ class Bpost_ShM_Adminhtml_Bpost_ShM_ConfigController extends Mage_Adminhtml_Cont
 
             $countryCodes = array();
             foreach ($xml->deliveryMethod as $deliveryMethodData) {
-                if($deliveryMethodData->product["name"] == $product){
+                foreach($deliveryMethodData->product as $productData){
+                    $attributes = $productData->attributes();
+                    $productName = $attributes["name"];
 
-                    $productData = $deliveryMethodData->product;
-                    foreach($productData->price as $priceData){
-                        $countryCode = (string)$priceData["countryIso2Code"];
-                        $countryCodes[] = $countryCode;
+                    if($productName == $product) {
+                        $productData = $deliveryMethodData->product;
+                        foreach ($productData->price as $priceData) {
+                            $countryCode = (string)$priceData["countryIso2Code"];
+                            $countryCodes[] = $countryCode;
+                        }
+
+                        break 2;
                     }
                 }
             }
+
 
             if(!empty($countryCodes)){
                 $countryModel = Mage::getModel("bpost_shm/country");

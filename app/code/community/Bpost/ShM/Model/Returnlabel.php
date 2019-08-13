@@ -34,7 +34,7 @@ class Bpost_ShM_Model_Returnlabel extends Mage_Core_Model_Abstract
     {
         $order = Mage::getModel('sales/order')->load($orderId);
         $bpostHelper = Mage::helper("bpost_shm");
-        $bpostReturnLabelHelper = Mage::helper("bpost_shm/returnlabel");
+        $returnLabelHelper = Mage::helper("bpost_shm/returnlabel");
 
         //check for return order
         $returnlabelResponse = Mage::getModel('bpost_shm/api', true)->createReturnLabel($order);
@@ -47,7 +47,7 @@ class Bpost_ShM_Model_Returnlabel extends Mage_Core_Model_Abstract
 
         //make sure we save with an unique name
         //if no barcode is returned (probably never)
-        $barcode = $bpostReturnLabelHelper->getBarcodeByLabelResponse($order, $parsedLabelResponse);
+        $barcode = $returnLabelHelper->getBarcodeByLabelResponse($order, $parsedLabelResponse);
 
         foreach($parsedLabelResponse["pdfString"] as $pdfString){
             //convertstring to pdf and save
@@ -65,7 +65,7 @@ class Bpost_ShM_Model_Returnlabel extends Mage_Core_Model_Abstract
 
         //we start a transaction
         //we save multiple objects
-        $transactionSave = Mage::getModel('core/resource_transaction')
+        Mage::getModel('core/resource_transaction')
         ->addObject($returnLabelObject)
         ->addObject($order)
         ->save();
@@ -89,16 +89,16 @@ class Bpost_ShM_Model_Returnlabel extends Mage_Core_Model_Abstract
         $returnLabel = Mage::getModel('bpost_shm/returnlabel')->load($returnId);
         $order = Mage::getModel('sales/order')->load($returnLabel->getOrderId());
         $billingAddress = $order->getBillingAddress();
-        $pdf_attachment = $returnLabel->getLabelPdfPath();
+        $pdfAttachment = $returnLabel->getLabelPdfPath();
 
         $templateVars = array('returnlabel' => $returnLabel, 'order' => $order, 'store' => Mage::app()->getStore($order->getStoreId()));
         $transactionalEmail = Mage::getModel('core/email_template')->setDesignConfig(array('area' => 'frontend', 'store' => $order->getStoreId()));
 
-        $filePath = Mage::getBaseDir('media') . self::MEDIA_RETURNLABEL_PATH . $pdf_attachment;
+        $filePath = Mage::getBaseDir('media') . self::MEDIA_RETURNLABEL_PATH . $pdfAttachment;
         $pdfFileParser = Zend_Pdf::load($filePath);
 
-        if (!empty($pdf_attachment) && $file->fileExists($filePath)) {
-            $fileName = $bpostHelper->getFileNameByPath($pdf_attachment);
+        if (!empty($pdfAttachment) && $file->fileExists($filePath)) {
+            $fileName = $bpostHelper->getFileNameByPath($pdfAttachment);
             $transactionalEmail->getMail()
                 ->createAttachment(
                     $pdfFileParser->render(),

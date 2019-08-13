@@ -59,7 +59,7 @@ class Bpost_ShM_Block_Carrier_Bpost extends Mage_Core_Block_Template
             "datepicker_saturday_pickuppoint" => (bool)$configHelper->getBpostCarriersConfig("saturday_delivery", "bpost_pickuppoint", Mage::app()->getStore()->getId()),
             "datepicker_saturday_parcellocker" => (bool)$configHelper->getBpostCarriersConfig("saturday_delivery", "bpost_parcellocker", Mage::app()->getStore()->getId()),
             "datepicker_days" => $this->getShippingDates(),
-            "onestepcheckout_active" => $bpostHelper->getIsOnestepCheckout(),
+            "onestepcheckout_active" => $bpostHelper->isOnestepCheckout(),
             "onestepcheckout_shipping_address_error" => $bpostHelper->__("Please select a postcode or city first.")
         );
 

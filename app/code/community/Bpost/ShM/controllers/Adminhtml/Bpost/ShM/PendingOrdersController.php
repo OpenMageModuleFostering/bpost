@@ -28,9 +28,9 @@ class Bpost_ShM_Adminhtml_Bpost_ShM_PendingOrdersController extends Bpost_ShM_Co
     protected function _isAllowed()
     {
         $configHelper = Mage::helper("bpost_shm/system_config");
-        $manageLabelsWithMagento = $configHelper->getBpostShippingConfig("manage_labels_with_magento");
+        $manageLabels = $configHelper->getBpostShippingConfig("manage_labels_with_magento");
 
-        if(!$manageLabelsWithMagento){
+        if(!$manageLabels){
             $this->_getSession()->addNotice('Please enable the "Use Magento to manage labels" setting first under "system -> configuration -> shipping settings -> Bpost Shipping Manager" if you want to use this functionality.');
             return false;
         }

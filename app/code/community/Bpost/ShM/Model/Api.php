@@ -90,7 +90,7 @@ class Bpost_ShM_Model_Api extends Bpost_ShM_Model_Api_Abstract
 
 
     /**
-     * @param $shipmentOrOrderObject
+     * @param $orderObject
      * @param bool $withReturnLabels
      * @param string $format
      * @return bool|Zend_Http_Response
@@ -100,7 +100,7 @@ class Bpost_ShM_Model_Api extends Bpost_ShM_Model_Api_Abstract
 
      * if no shipment is given, we will download in bulk
      */
-    public function createLabelByShipmentOrInBulk($shipmentOrOrderObject = false, $withReturnLabels = false, $format = "pdf", $referencePrefix = "S"){
+    public function createLabelByShipmentOrInBulk($orderObject = false, $withReturnLabels = false, $format = "pdf", $referencePrefix = "S"){
         if($format === "pdf"){
             $headers = array("Content-Type:application/vnd.bpost.shm-labelRequest-v3+XML","Accept:application/vnd.bpost.shm-label-pdf-v3+XML");
         }else{
@@ -109,12 +109,12 @@ class Bpost_ShM_Model_Api extends Bpost_ShM_Model_Api_Abstract
 
         $configHelper =  Mage::helper("bpost_shm/system_config");
 
-        if($shipmentOrOrderObject){
-            $storeId = $shipmentOrOrderObject->getStoreId();
-            $referenceId = $referencePrefix.$shipmentOrOrderObject->getIncrementId();
+        if($orderObject){
+            $storeId = $orderObject->getStoreId();
+            $referenceId = $referencePrefix.$orderObject->getIncrementId();
 
-            if($shipmentOrOrderObject->getNewReference()){
-                $referenceId = $shipmentOrOrderObject->getNewReference();
+            if($orderObject->getNewReference()){
+                $referenceId = $orderObject->getNewReference();
             }
 
             $labelFormat = strtoupper($configHelper->getBpostShippingConfig("label_format", $storeId));

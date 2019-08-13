@@ -153,14 +153,14 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
         $hash = bin2hex(mcrypt_create_iv(5, MCRYPT_DEV_URANDOM));
         $name = $name . "-" . $hash;
 
-        $io = new Varien_Io_File();
-        $io->setAllowCreateFolders(true);
-        $io->open(array('path' => Mage::getBaseDir('media') . "/bpost/" . $folder));
-        $io->streamOpen($name . '.pdf', 'w+');
-        $io->streamLock(true);
-        $io->streamWrite($pdfString);
-        $io->streamUnlock();
-        $io->streamClose();
+        $varienFile = new Varien_Io_File();
+        $varienFile->setAllowCreateFolders(true);
+        $varienFile->open(array('path' => Mage::getBaseDir('media') . "/bpost/" . $folder));
+        $varienFile->streamOpen($name . '.pdf', 'w+');
+        $varienFile->streamLock(true);
+        $varienFile->streamWrite($pdfString);
+        $varienFile->streamUnlock();
+        $varienFile->streamClose();
         return $name;
     }
 
@@ -168,10 +168,10 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
      * Function returns the locale code by order
      *
      * @param $order
-     * @param $useExceptionLanguages
+     * @param $useExceptionLanguage
      * @return string
      */
-    public function getLocaleByOrder($order, $useExceptionLanguages = false)
+    public function getLocaleByOrder($order, $useExceptionLanguage = false)
     {
         $exceptionLanguages = array("DE");
 
@@ -187,7 +187,7 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
                 break;
 
             default:
-                if ($useExceptionLanguages && in_array($locale, $exceptionLanguages)) {
+                if ($useExceptionLanguage && in_array($locale, $exceptionLanguages)) {
                     return $locale;
                 }
 
@@ -348,7 +348,7 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
             }
         } else {
 
-            if($bpostHelper->getIsOnestepCheckout()){
+            if($bpostHelper->isOnestepCheckout()){
                 if(isset($params["address_id"]) && $params["address_id"] != null){
                     //load customer address and use
                     $shippingAddress = Mage::getModel("customer/address")->load($params["address_id"]);
@@ -512,38 +512,30 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
         $shippingCost = $quote->getShippingAddress()->getData('shipping_incl_tax');
         //bpost helper
         $helper = Mage::helper('bpost_shm');
-
         //get config values
         $configHelper = Mage::helper("bpost_shm/system_config");
         $displayDeliveryDate = (bool)$configHelper->getBpostShippingConfig("display_delivery_date", Mage::app()->getStore()->getId());
         $chooseDeliveryDate = (bool)$configHelper->getBpostShippingConfig("choose_delivery_date", Mage::app()->getStore()->getId());
-        $daysBetweenOrderAndShipment = $configHelper->getBpostShippingConfig("days_between_order_and_shipment", Mage::app()->getStore()->getId());
-        $nrOfDeliveryDaysShown = $configHelper->getBpostShippingConfig("nr_of_delivery_days_shown", Mage::app()->getStore()->getId());
-        $nextDayDeliveryAllowedTill = $configHelper->getBpostShippingConfig("next_day_delivery_allowed_till", Mage::app()->getStore()->getId());
-
+        $daysBetweenShipment = $configHelper->getBpostShippingConfig("days_between_order_and_shipment", Mage::app()->getStore()->getId());
+        $nrOfDaysShown = $configHelper->getBpostShippingConfig("nr_of_delivery_days_shown", Mage::app()->getStore()->getId());
+        $cutoffTime = $configHelper->getBpostShippingConfig("next_day_delivery_allowed_till", Mage::app()->getStore()->getId());
         //get the Magento date model
         $dateModel = Mage::getSingleton('core/date');
-
         //days to add counter, will always be 1 since delivery is never on the same day
         $daysToStart = 1;
-
         //add a day if the current time surpasses the time treshold
         $time = $dateModel->date('H,i');
-
-        if($nextDayDeliveryAllowedTill <= $time && substr($nextDayDeliveryAllowedTill, 0, 5) != '00,00') {
+        if($cutoffTime <= $time && substr($cutoffTime, 0, 5) != '00,00') {
             $daysToStart = 2;
         }
-
         //get the current date
         $currentDate = $dateModel->date();
-
         //define all bpost shipping methods
         $shippingMethods = array(
             'bpost_homedelivery' => false,
             'bpost_pickuppoint' => false,
             'bpost_parcellocker' => false
         );
-
         foreach ($shippingMethods as $method => $value) {
             //get saturday delivery flags
             $saturdayDelivery = (bool)$configHelper->getBpostCarriersConfig("saturday_delivery", $method, Mage::app()->getStore()->getId());
@@ -552,11 +544,9 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
             if(($grandTotal - $shippingCost) < $saturdayDeliveryFrom) {
                 $saturdayDelivery = false;
             }
-
             $extraDays = $daysToStart;
             //add total days between order and shipment
-            $totalDays = $extraDays + $daysBetweenOrderAndShipment;
-
+            $totalDays = $extraDays + $daysBetweenShipment;
             //loop over days checking for the first valid day
             for($i = 1; $i <= $totalDays; $i++) {
                 $nextDate = $this->_formatDeliveryDate($currentDate.' +'.$i.' days');
@@ -565,9 +555,7 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
                     $totalDays++;
                 }
             }
-
             $startDate = $this->_formatDeliveryDate($currentDate.' +'.$totalDays.' days');
-
             //customer gets a date from the system
             if($displayDeliveryDate && !$chooseDeliveryDate) {
                 $shippingMethods[$method] = array(
@@ -581,8 +569,7 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
             } else if($displayDeliveryDate && $chooseDeliveryDate) {
                 $days = array();
                 $addedDays = 0;
-
-                for($i = 0; $i < $nrOfDeliveryDaysShown; $i++) {
+                for($i = 0; $i < $nrOfDaysShown; $i++) {
                     //add starting date to array
                     if($i == 0) {
                         $days[$i] = array(
@@ -593,7 +580,6 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
                     } else {
                         $addedDays++;
                         $nextDate = $this->_formatDeliveryDate($startDate.' +'.$addedDays.' days');
-
                         $validDate = false;
                         while($validDate == false) {
                             if($this->_isValidDeliveryDate($nextDate, $saturdayDelivery, $method, $closedOn)) {
@@ -603,18 +589,15 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
                                 $nextDate = $this->_formatDeliveryDate($startDate.' +'.$addedDays.' days');
                             }
                         }
-
                         $days[$i] = array(
                             'date' => $nextDate,
                             'date_format' => $helper->__($this->_formatDeliveryDate($nextDate, 'l')).'<span>'.$this->_formatDeliveryDate($nextDate, 'j')." ".strtolower($helper->__($this->_formatDeliveryDate($nextDate, 'F'))).'</span>'
                         );
                     }
                 }
-
                 $shippingMethods[$method] = $days;
             }
         }
-
         return $shippingMethods;
     }
 
@@ -772,7 +755,7 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @return bool
      */
-    public function getIsOnestepCheckout()
+    public function isOnestepCheckout()
     {
         if (strpos(Mage::helper("core/url")->getCurrentUrl(), 'onestepcheckout') !== false || strpos(Mage::app()->getRequest()->getHeader('referer'), 'onestepcheckout') !== false) {
             return true;

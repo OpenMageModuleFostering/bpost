@@ -13,7 +13,7 @@ if (!Mage::helper('core')->isModuleEnabled('Bpost_ShippingManager')) {
     $installer->startSetup();
 
     //create the return label table
-    $table_holidays = $installer->getConnection()->newTable($installer->getTable('bpost_shm/bpost_holidays'))
+    $tableHolidays = $installer->getConnection()->newTable($installer->getTable('bpost_shm/bpost_holidays'))
         ->addColumn('holiday_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, array(
             'unsigned' => true,
             'nullable' => false,
@@ -25,7 +25,7 @@ if (!Mage::helper('core')->isModuleEnabled('Bpost_ShippingManager')) {
             'default' => null,
         ), "date")
         ->setComment('bpost holiday list');
-    $installer->getConnection()->createTable($table_holidays);
+    $installer->getConnection()->createTable($tableHolidays);
 
     //import 2015 holidays
     $installer->run("

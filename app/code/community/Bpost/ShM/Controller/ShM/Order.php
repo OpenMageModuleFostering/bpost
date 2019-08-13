@@ -79,18 +79,18 @@ class Bpost_ShM_Controller_ShM_Order extends Mage_Adminhtml_Controller_Action
 
         //first check if we have already messages in this request
         //if so, add these to the messages array
-        foreach(Mage::getSingleton('core/session')->getMessages()->getItems() as $currentSessionMessage){
-            switch($currentSessionMessage->getType()){
+        foreach(Mage::getSingleton('core/session')->getMessages()->getItems() as $sessionMessage){
+            switch($sessionMessage->getType()){
                 case "notice":
-                    $messages["notice"][] = $currentSessionMessage->getCode();
+                    $messages["notice"][] = $sessionMessage->getCode();
                 break;
 
                 case "error":
-                    $messages["error"][] = $currentSessionMessage->getCode();
+                    $messages["error"][] = $sessionMessage->getCode();
                 break;
 
                 case "success":
-                    $messages["success"][] = $currentSessionMessage->getCode();
+                    $messages["success"][] = $sessionMessage->getCode();
                 break;
             }
         }

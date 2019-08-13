@@ -2,7 +2,7 @@
 <?php $bpostHelper = Mage::helper("bpost_shm");?>
 
 <div id="bpostShm" class="bpostspotswrapper">
-    <?php if($bpostHelper->getIsOnestepCheckout()){ ?>
+    <?php if($bpostHelper->isOnestepCheckout()){ ?>
         <div id="bpost-info-wrapper">
             <div id="bpostinfo"></div>
         </div>
@@ -50,7 +50,7 @@
     <div class="cf"></div>
     <div class="bpost-saturday-delivery">
         <label for="bpost-saturday">
-            <input type="checkbox" <?php if($bpostHelper->getIsOnestepCheckout()){ echo 'onclick="stopObserving(); triggerAjaxCallGetSeparateSaveMethods(\'' . $this->getUrl('onestepcheckout/ajax/set_methods_separate', array('_secure'=>true)) . '\', false);"';}?> name="bpost_saturday_delivery" id="bpost-saturday" value="1" />
+            <input type="checkbox" <?php if($bpostHelper->isOnestepCheckout()){ echo 'onclick="stopObserving(); triggerAjaxCallGetSeparateSaveMethods(\'' . $this->getUrl('onestepcheckout/ajax/set_methods_separate', array('_secure'=>true)) . '\', false);"';}?> name="bpost_saturday_delivery" id="bpost-saturday" value="1" />
             <div class="bpost-label-text"><?php echo $settings['datepicker_saturday_delivery_text'] ?><?php if($this->getSaturdayDeliveryCost()) { ?><br /><small><?php echo sprintf($settings['datepicker_saturday_delivery_cost'], $this->getSaturdayDeliveryCost()) ?></small><?php } ?></div>
         </label>
     </div>

@@ -47,26 +47,6 @@ class Bpost_ShM_Model_Adminhtml_Observer extends Varien_Event_Observer
             }
         }
 
-        //add extra tab return barcodes on order view page
-        //removed on bpost's request
-
-        /*
-        if($block instanceof Mage_Adminhtml_Block_Sales_Order_View_Tabs){
-            $order = $block->getOrder();
-
-            if(strpos($order->getShippingMethod(), 'bpost') !== false){
-                $block->addTab('order_view_tab_bpostreturnbarcodetab', array(
-                    'label' => Mage::helper('bpost_shm')->__('bpost Return Barcodes'),
-                    'title' => Mage::helper('bpost_shm')->__('bpost Return Barcodes'),
-                    'after' => "order_view_tab_bpostreturnlabeltab",
-                    'content' => $block->getLayout()->createBlock('bpost_shm/adminhtml_sales_order_view_tab_returnbarcode', 'bpost_returnbarcode_grid')->toHtml()
-                ));
-
-                $block->setActiveTab("order_info");
-            }
-        }
-        */
-
         return false;
     }
 
@@ -102,9 +82,9 @@ class Bpost_ShM_Model_Adminhtml_Observer extends Varien_Event_Observer
 
             if($order->getBpostReference()){
                 try{
-                    $bpostShipmentStatuses = $bpostHelper->getBpostStatus($order);
+                    $shipmentStatuses = $bpostHelper->getBpostStatus($order);
 
-                    if(!$bpostShipmentStatuses){
+                    if(!$shipmentStatuses){
                         continue;
                     }
 
@@ -122,8 +102,8 @@ class Bpost_ShM_Model_Adminhtml_Observer extends Varien_Event_Observer
                     foreach($trackCollection as $track){
                         $trackNumber = $track->getTrackNumber();
 
-                        if($trackNumber && isset($bpostShipmentStatuses[$trackNumber])){
-                            $status = $bpostShipmentStatuses[$trackNumber];
+                        if($trackNumber && isset($shipmentStatuses[$trackNumber])){
+                            $status = $shipmentStatuses[$trackNumber];
                             $shipment = $track->getShipment();
                             $shipment->setBpostStatus($status);
                             $transaction->addObject($shipment);
@@ -144,15 +124,15 @@ class Bpost_ShM_Model_Adminhtml_Observer extends Varien_Event_Observer
                     //need to save shipment and order
                     if($dataChanged){
                         $transaction->addObject($order);
-
-                        //save transaction
-                        $transaction->save();
                     }
                 }catch(Exception $e){
                     Mage::helper("bpost_shm")->ApiLog($e->getMessage(), Zend_Log::ERR);
                 }
             }
         }
+
+        //save transaction
+        $transaction->save();
     }
 
 
@@ -167,12 +147,11 @@ class Bpost_ShM_Model_Adminhtml_Observer extends Varien_Event_Observer
 
 
     /**
-     * @param $observer
      * @return $this
      * function triggered when saving shipping settings bpost module
      * checks if authentication is valid
      */
-    public function admin_system_config_changed_section_shipping($observer)
+    public function admin_system_config_changed_section_shipping()
     {
         /** @var Bpost_ShM_Model_Api $api */
         $session = Mage::getSingleton("adminhtml/session");

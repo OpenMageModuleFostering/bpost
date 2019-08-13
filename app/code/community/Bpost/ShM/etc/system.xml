@@ -216,7 +216,7 @@
                             <depends>
                                 <manage_labels_with_magento>1</manage_labels_with_magento>
                             </depends>
-                            <comment><![CDATA[If you enable this option, the bpost Track & Trace link will be added in the Magento mail templates. It is always possible to manually send these emails.<br/><a href='http://bpost.freshdesk.com/solution/articles/4000061636' target='_blank'>http://bpost.freshdesk.com/solution/articles/4000061636</a>]]></comment>
+                            <comment><![CDATA[If you enable this option, the bpost Track & Trace link will be added in the Magento mail templates. It is always possible to manually send these emails.<br/><a href='http://bpost.freshdesk.com/solution/articles/4000062605' target='_blank'>http://bpost.freshdesk.com/solution/articles/4000062605</a>]]></comment>
                         </automatic_track_and_trace_information>
 
                         <display_delivery_date translate="label,comment">

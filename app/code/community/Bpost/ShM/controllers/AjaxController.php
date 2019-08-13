@@ -104,44 +104,42 @@ class Bpost_ShM_AjaxController extends Mage_Core_Controller_Front_Action {
         $request = $this->getRequest();
         $isAjax = $request->isAjax();
 
-        if ($isAjax) {
-            $id = $request->getPost("id");
-            $type = $request->getPost("type");
+        $id = $request->getPost("id");
+        $type = $request->getPost("type");
 
-            if(($id && $type)) {
-                $apiCall = Mage::helper('bpost_shm')->getBpostOpeningHours($id, $type);
-                $error = array();
-                $weekDays = array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
-                $closedOn = array();
+        if ($isAjax && $id && $type) {
+            $apiCall = Mage::helper('bpost_shm')->getBpostOpeningHours($id, $type);
+            $error = array();
+            $weekDays = array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
+            $closedOn = array();
 
-                $xml = simplexml_load_string($apiCall);
+            $xml = simplexml_load_string($apiCall);
 
-                try{
-                    $openingHours = $xml->Poi->Record->Hours;
+            try{
+                $openingHours = $xml->Poi->Record->Hours;
 
-                    foreach($weekDays as $weekDay) {
-                        $day = $openingHours->$weekDay;
+                foreach($weekDays as $weekDay) {
+                    $day = $openingHours->$weekDay;
 
-                        if($day) {
-                            if(empty($day->AMOpen[0]) && empty($day->AMClose[0]) && empty($day->PMOpen[0]) && empty($day->PMClose[0])) {
-                                //assume the point is closed for the day
-                                array_push($closedOn, $weekDay);
-                            }
+                    if($day) {
+                        if(empty($day->AMOpen[0]) && empty($day->AMClose[0]) && empty($day->PMOpen[0]) && empty($day->PMClose[0])) {
+                            //assume the point is closed for the day
+                            array_push($closedOn, $weekDay);
                         }
                     }
-
-                    $shippingDates = Mage::helper('bpost_shm')->getBpostShippingDates($closedOn);
-
-                }catch (Exception $e){
-                    Mage::helper("bpost_shm")->log("Webservice: not expected result returned:" . $e->getMessage(), Zend_Log::WARN);
-                    $shippingDates = "";
-                    $error[] = Mage::helper('bpost_shm')->__("Sorry, there was a problem contacting bpost, please contact the store owner for support.");
                 }
 
-                $payloadFull = array("error" => $error, "dates" => $shippingDates);
-                $this->getResponse()->setHeader('Content-type', 'application/json');
-                $this->getResponse()->setBody(json_encode($payloadFull));
+                $shippingDates = Mage::helper('bpost_shm')->getBpostShippingDates($closedOn);
+
+            }catch (Exception $e){
+                Mage::helper("bpost_shm")->log("Webservice: not expected result returned:" . $e->getMessage(), Zend_Log::WARN);
+                $shippingDates = "";
+                $error[] = Mage::helper('bpost_shm')->__("Sorry, there was a problem contacting bpost, please contact the store owner for support.");
             }
+
+            $payloadFull = array("error" => $error, "dates" => $shippingDates);
+            $this->getResponse()->setHeader('Content-type', 'application/json');
+            $this->getResponse()->setBody(json_encode($payloadFull));
         }
     }
 }

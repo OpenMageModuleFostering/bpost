@@ -13,7 +13,7 @@
 class Bpost_ShM_Model_Adminhtml_System_Config_Source_Datecomment extends Mage_Core_Model_Config_Data
 {
 
-    public function getCommentText(Mage_Core_Model_Config_Element $element, $currentValue)
+    public function getCommentText()
     {
         $bpostHelper = Mage::helper("bpost_shm");
         $popupUrl = "'" . Mage::helper("adminhtml")->getUrl('adminhtml/bpost_shM_config/screenshotpopup') . "'";

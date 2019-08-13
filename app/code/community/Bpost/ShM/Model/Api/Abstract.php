@@ -67,7 +67,7 @@ class Bpost_ShM_Model_Api_Abstract extends Mage_Core_Model_Abstract
      * @return bool
      * function checks if the current object is initialized or not
      */
-    public function getIsInitialized(){
+    public function isInitialized(){
         if($this->_initialized){
             return true;
         }
@@ -84,7 +84,7 @@ class Bpost_ShM_Model_Api_Abstract extends Mage_Core_Model_Abstract
     protected function _getRestClient($headers = null){
         try{
             //first make sure the current model is initialized
-            if(!$this->getIsInitialized()){
+            if(!$this->isInitialized()){
                 Mage::throwException('Please initialize your API model first by calling the initialize() function.');
             }
 
@@ -101,6 +101,8 @@ class Bpost_ShM_Model_Api_Abstract extends Mage_Core_Model_Abstract
         }catch(Exception $e){
             Mage::helper("bpost_shm")->ApiLog($e->getMessage(), Zend_Log::ERR);
         }
+
+        return false;
     }
 
 
@@ -124,6 +126,8 @@ class Bpost_ShM_Model_Api_Abstract extends Mage_Core_Model_Abstract
         }catch(Exception $e){
             Mage::helper("bpost_shm")->ApiLog($e->getMessage(), Zend_Log::ERR);
         }
+
+        return false;
     }
 
 
@@ -177,6 +181,8 @@ class Bpost_ShM_Model_Api_Abstract extends Mage_Core_Model_Abstract
                 return false;
             }
         }
+
+        return false;
     }
 
 
@@ -216,9 +222,9 @@ class Bpost_ShM_Model_Api_Abstract extends Mage_Core_Model_Abstract
             switch($errorHandlingData["request_name"]){
                 case "createOrder":
                     //only send error email if 'use Magento to manage labels' is false
-                    $manageLabelsWithMagento = $configHelper->getBpostShippingConfig("manage_labels_with_magento");
+                    $manageLabels = $configHelper->getBpostShippingConfig("manage_labels_with_magento");
 
-                    if(!$manageLabelsWithMagento){
+                    if(!$manageLabels){
                         //require email template, add error message, and send it to the shopmanager
                         $receiver = Mage::getStoreConfig('trans_email/ident_general/email');
                         $receiverName = Mage::getStoreConfig('trans_email/ident_general/name');

@@ -13,12 +13,12 @@
  */
 class Bpost_ShM_Model_Shipping_Geocode
 {
-    protected $address_line;
+    protected $_addressLine;
     /**
      * @var Bpost_ShM_Helper_Data
      */
-    protected $success = false;
-    protected $xml;
+    protected $_success = false;
+    protected $_xml;
 
     /**
      * Make the call to google geocode
@@ -33,11 +33,11 @@ class Bpost_ShM_Model_Shipping_Geocode
         $key = $configHelper->getBpostShippingConfig("server_api_key");
 
         if($gMapsAddress) {
-            $this->address_line = $gMapsAddress;
+            $this->_addressLine = $gMapsAddress;
             $url = 'https://maps.googleapis.com/maps/api/geocode/xml?address=' . urlencode($gMapsAddress);
         } else {
             $coords = $latitude.','.$longitude;
-            $this->address_line = $coords;
+            $this->_addressLine = $coords;
             $url = 'https://maps.googleapis.com/maps/api/geocode/xml?latlng=' . urlencode($coords);
         }
         $url .= '&language=nl';
@@ -48,13 +48,13 @@ class Bpost_ShM_Model_Shipping_Geocode
             $xml = simplexml_load_file($url);
             switch($xml->status){
                 case "OK":
-                    $this->success = true;
-                    $this->xml = $xml;
-                    Mage::helper('bpost_shm')->log("Geocode: OK ".$this->address_line." to xml" ,Zend_Log::DEBUG);
+                    $this->_success = true;
+                    $this->_xml = $xml;
+                    Mage::helper('bpost_shm')->log("Geocode: OK ".$this->_addressLine." to xml" ,Zend_Log::DEBUG);
                     return $this;
                     break;
                 case "ZERO_RESULTS":
-                    Mage::helper('bpost_shm')->log("Geocode: no results found for ".$this->address_line,Zend_Log::DEBUG);
+                    Mage::helper('bpost_shm')->log("Geocode: no results found for ".$this->_addressLine,Zend_Log::DEBUG);
                     return false;
                     break;
                 case "OVER_QUERY_LIMIT":
@@ -104,9 +104,9 @@ class Bpost_ShM_Model_Shipping_Geocode
      */
     public function getLatLng()
     {
-        if($this->success){
-            $lat = (string)$this->xml->result[0]->geometry->location->lat;
-            $lng = (string)$this->xml->result[0]->geometry->location->lng;
+        if($this->_success){
+            $lat = (string)$this->_xml->result[0]->geometry->location->lat;
+            $lng = (string)$this->_xml->result[0]->geometry->location->lng;
 
             if(isset($lat) && isset($lng)) {
                 return array('lat' => $lat, 'lng' => $lng);
@@ -121,9 +121,9 @@ class Bpost_ShM_Model_Shipping_Geocode
      */
     public function getPostalCode()
     {
-        if($this->success){
-            $postalCode = $this->_extractFromAdress($this->xml->result[0], 'postal_code');
-            $locality = $this->_extractFromAdress($this->xml->result[0], 'locality');
+        if($this->_success){
+            $postalCode = $this->_extractFromAdress($this->_xml->result[0], 'postal_code');
+            $locality = $this->_extractFromAdress($this->_xml->result[0], 'locality');
 
             if($postalCode) {
                 return (string)$postalCode;

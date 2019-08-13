@@ -13,7 +13,7 @@ if (!Mage::helper('core')->isModuleEnabled('Bpost_ShippingManager')) {
     $installer->startSetup();
 
     //create the return label table
-    $table_returnLabel = $installer->getConnection()->newTable($installer->getTable('bpost_shm/returnlabel'))
+    $tableReturnLabel = $installer->getConnection()->newTable($installer->getTable('bpost_shm/returnlabel'))
         ->addColumn('label_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, array(
             'unsigned' => true,
             'nullable' => false,
@@ -32,7 +32,7 @@ if (!Mage::helper('core')->isModuleEnabled('Bpost_ShippingManager')) {
         ), "Id of the order")
         ->addColumn('date_created', Varien_Db_Ddl_Table::TYPE_DATETIME, null, array(), 'Creation Date')
         ->setComment('bpost Shipping Return Labels');
-    $installer->getConnection()->createTable($table_returnLabel);
+    $installer->getConnection()->createTable($tableReturnLabel);
 
     $installer->endSetup();
 

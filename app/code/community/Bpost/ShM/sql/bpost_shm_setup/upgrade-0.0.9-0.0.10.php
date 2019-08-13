@@ -13,7 +13,7 @@ if (!Mage::helper('core')->isModuleEnabled('Bpost_ShippingManager')) {
     $installer->startSetup();
 
     //create the return label table
-    $table_returnLabel = $installer->getConnection()->newTable($installer->getTable('bpost_shm/bpost_country'))
+    $tableReturnLabel = $installer->getConnection()->newTable($installer->getTable('bpost_shm/bpost_country'))
         ->addColumn('country_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, array(
             'unsigned' => true,
             'nullable' => false,
@@ -25,7 +25,7 @@ if (!Mage::helper('core')->isModuleEnabled('Bpost_ShippingManager')) {
             'default' => "",
         ), "country code")
         ->setComment('bpost country code');
-    $installer->getConnection()->createTable($table_returnLabel);
+    $installer->getConnection()->createTable($tableReturnLabel);
     $installer->endSetup();
 
 }

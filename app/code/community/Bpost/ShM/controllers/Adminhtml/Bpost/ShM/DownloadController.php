@@ -17,39 +17,32 @@ class Bpost_ShM_Adminhtml_Bpost_ShM_DownloadController extends Mage_Adminhtml_Co
         $bpostMediaFilePath = Mage::getBaseDir('media') . Bpost_ShM_Model_Adminhtml_Bpostgrid::MEDIA_LABEL_PATH;
         $shipmentCollection = Mage::getResourceModel('sales/order_shipment_collection');
 
-        $order = false;
-        $pdfDownloadName = "";
-
         if($orderId){
+            $shipmentCollection->addFieldToFilter('order_id', $orderId);
+            $shipmentCollection->addFieldToFilter('bpost_label_path', array("neq" => ""));
+            $shipment = $shipmentCollection->getFirstItem();
+
             //get shipments by order
             $order = Mage::getModel("sales/order")->load($orderId);
             $pdfDownloadName = $order->getIncrementId().".pdf";
-
-            $shipmentCollection->addFieldToFilter('order_id', $orderId);
-            $shipmentCollection->addFieldToFilter('bpost_label_path', array("neq" => ""));
         }else{
             $shipmentId = $request->getParam('shipment_id');
             $shipmentCollection->addFieldToFilter('entity_id', $shipmentId);
-        }
+            $shipment = $shipmentCollection->getFirstItem();
 
-        $pdfMerged = new Zend_Pdf();
-        $shipment = $shipmentCollection->getFirstItem();
-
-        $merged = false;
-        if(!$order){
-            $order = $shipment->getOrder();
-        }
-
-        if(!$orderId){
-            $pdfDownloadName = $shipment->getIncrementId().".pdf";
-
-            if ($shipment->getBpostLabelPath() == "") {
+            if (!$shipment->hasData() || $shipment->getBpostLabelPath() == "") {
                 $message = Mage::helper('bpost_shm')->__("No label generated yet - please perform the ‘Generate Label and Complete’ action from the overview.");
                 Mage::getSingleton('core/session')->addError($message);
                 $this->_redirect('*/sales_order_shipment/view/' , array('shipment_id' => $shipmentId));
                 return;
             }
+
+            $order = $shipment->getOrder();
+            $pdfDownloadName = $shipment->getIncrementId().".pdf";
         }
+
+        $pdfMerged = new Zend_Pdf();
+        $merged = false;
 
         if ($shipment->getBpostLabelPath() != "") {
             $pdfNames = explode(":", $shipment->getBpostLabelPath());

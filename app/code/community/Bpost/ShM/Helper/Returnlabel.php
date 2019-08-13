@@ -19,8 +19,8 @@ class Bpost_ShM_Helper_Returnlabel extends Mage_Core_Helper_Abstract
      * unfortunately, we must do this with collection count
      */
     public function getOrderReturnlabelsCount($orderId){
-        $returnLabelCollection = Mage::getModel("bpost_shm/returnlabel");
-        $collection = $returnLabelCollection->getCollection()->addFieldToFilter("order_id", $orderId);
+        $labelCollection = Mage::getModel("bpost_shm/returnlabel");
+        $collection = $labelCollection->getCollection()->addFieldToFilter("order_id", $orderId);
 
         return $collection->count();
     }
