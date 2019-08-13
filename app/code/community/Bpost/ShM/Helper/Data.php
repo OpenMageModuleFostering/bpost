@@ -532,10 +532,12 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
         $dateModel = Mage::getSingleton('core/date');
         //days to add counter, will always be 1 since delivery is never on the same day
         $daysToStart = 1;
+        $cutoffTimeSurpassed = false;
         //add a day if the current time surpasses the time treshold
         $time = $dateModel->date('H,i');
         if($cutoffTime <= $time && substr($cutoffTime, 0, 5) != '00,00') {
             $daysToStart = 2;
+            $cutoffTimeSurpassed = true;
         }
         //get the current date
         $currentDate = $dateModel->date();
@@ -566,6 +568,12 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
                     $totalDays++;
                 }
             }
+
+            // PBMS-224: check if bpost can pick up the package if saturdayDelivery is enabled.
+            if ($saturdayDelivery && !$this->_canBPostPickupPackage($currentDate, $cutoffTimeSurpassed)) {
+                $totalDays++;
+            }
+
             $startDate = $this->_formatDeliveryDate($currentDate.' +'.$totalDays.' days');
             //customer gets a date from the system
             if($displayDeliveryDate && !$chooseDeliveryDate) {
@@ -666,6 +674,32 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
         return $nextDate;
     }
 
+    /**
+     * PBMS-224: A check to see if the current date is a valid date for picking up packages.
+     * BPost can't pickup packages on holidays, sunday, saturday and after cutoffTime.
+     *
+     * @param $currentDate
+     * @param bool $cutoffTimeSurpassed
+     * @return bool
+     */
+    protected function _canBPostPickupPackage($currentDate, $cutoffTimeSurpassed = true)
+    {
+        if ($this->_isHoliday($currentDate)) {
+            return false;
+        }
+        if ($this->_isSunday($currentDate)) {
+            return false;
+        }
+        if ($this->_isSaturday($currentDate)) {
+            return false;
+        }
+        if ($cutoffTimeSurpassed && $this->_isFriday($currentDate)) {
+           return false;
+        }
+
+        return true;
+    }
+
 
     protected function _isValidDeliveryDate($deliveryDate, $saturdayAllowed = false, $method = false, $closedOn = false) {
         if($this->_isHoliday($deliveryDate)) {
@@ -702,6 +736,16 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
         return true;
     }
 
+    /**
+     * Check if date is on a friday
+     *
+     * @param $date
+     * @return bool
+     */
+    protected function _isFriday($date)
+    {
+        return ($this->_formatDeliveryDate($date, "N") == 5);
+    }
 
     /**
      * Check if date is on a saturday
