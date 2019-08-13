@@ -21,7 +21,6 @@ class Bpost_ShM_Block_Adminhtml_Sales_Grid extends Mage_Adminhtml_Block_Widget_G
         $this->getCollection()->getSize();
 
         if ($this->getCollection()) {
-            $this->getCollection()->addExpressionFieldToSelect('shipping_customer_name', "IF(shipping_method='bpostshm_bpost_international', CONCAT('International: ', shipping_name), shipping_name)" ,'shipping_customer_name');
             $this->getCollection()->getSelect()->joinLeft(Mage::getConfig()->getTablePrefix() . 'sales_flat_shipment as sfs', 'sfs.order_id=`main_table`.entity_id', array(
                 'bpost_label_path' => 'bpost_label_path',
             ))->group('main_table.entity_id');
@@ -37,6 +36,8 @@ class Bpost_ShM_Block_Adminhtml_Sales_Grid extends Mage_Adminhtml_Block_Widget_G
      */
     protected function _prepareColumns()
     {
+        $configHelper = Mage::helper('bpost_shm/system_config');
+
         $helper = Mage::helper('bpost_shm');
         $this->addColumn('real_order_id', array(
             'header' => $helper->__('Order #'),
@@ -108,7 +109,7 @@ class Bpost_ShM_Block_Adminhtml_Sales_Grid extends Mage_Adminhtml_Block_Widget_G
             'options' => array('1' => 'Yes', '0' => 'No'),
             'filter_index' => 'sfo.bpost_label_exists'
         ));
-        if (Mage::getStoreConfig('shipping/bpost_shm/display_delivery_date')) {
+        if ($configHelper->getBpostShippingConfig('display_delivery_date', Mage::app()->getStore()->getId())) {
             $this->addColumn('bpost_drop_date', array(
                 'header' => $helper->__('Drop date'),
                 'index' => 'bpost_drop_date',

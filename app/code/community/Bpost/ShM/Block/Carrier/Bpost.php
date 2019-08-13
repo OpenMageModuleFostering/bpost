@@ -54,7 +54,7 @@ class Bpost_ShM_Block_Carrier_Bpost extends Mage_Core_Block_Template
             "location_postpoint_default_image" => $this->getSkinUrl('images/bpost/location_postpoint_default.png'),
             "location_parcellocker_default_image" => $this->getSkinUrl('images/bpost/location_parcellocker_default.png'),
             "location_clickcollect_default_image" => $this->getSkinUrl('images/bpost/location_clickcollect_default.png'),
-            "location_clickcollect_custom_image" => (Mage::getStoreConfig('carriers/bpost_clickcollect/marker') ? Mage::getBaseUrl('media') . "bpost/" . $configHelper->getBpostCarriersConfig("marker", "bpost_clickcollect", Mage::app()->getStore()->getId()) : ""),
+            "location_clickcollect_custom_image" => ($configHelper->getBpostCarriersConfig('marker', 'bpost_clickcollect', Mage::app()->getStore()->getId()) ? Mage::getBaseUrl('media') . "bpost/" . $configHelper->getBpostCarriersConfig("marker", "bpost_clickcollect", Mage::app()->getStore()->getId()) : ""),
             "base_url" => Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK, Mage::app()->getStore()->isCurrentlySecure()),
             "datepicker_display" => (bool)$configHelper->getBpostShippingConfig("display_delivery_date", Mage::app()->getStore()->getId()),
             "datepicker_choose" => (bool)$configHelper->getBpostShippingConfig("choose_delivery_date", Mage::app()->getStore()->getId()),

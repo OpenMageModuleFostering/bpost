@@ -169,11 +169,12 @@ class Bpost_ShM_Model_Adminhtml_Observer extends Varien_Event_Observer
 
     protected function _checkAndTriggerClickCollect($apiResponseBody){
         $xml = simplexml_load_string($apiResponseBody);
+        $configHelper = Mage::helper('bpost_shm/system_config');
         foreach ($xml->deliveryMethod as $deliveryMethodData) {
             if($deliveryMethodData['name'] == "Click & Collect" && $deliveryMethodData['visiblity'] == "VISIBLE"){
                 Mage::getConfig()->saveConfig('carriers/bpost_clickcollect/activated', '1');
                 Mage::getConfig()->saveConfig('carriers/bpost_clickcollect/active', '1');
-                if(Mage::getStoreConfig('carriers/bpost_clickcollect/marker') == ""){
+                if($configHelper->getBpostCarriersConfig('marker', 'bpost_clickcollect') == ""){
 
                     $src = Mage::getBaseDir('skin') .
                         DS . 'frontend' .
@@ -192,7 +193,7 @@ class Bpost_ShM_Model_Adminhtml_Observer extends Varien_Event_Observer
                 Mage::app()->getCacheInstance()->cleanType('config');
                 return $this;
             }
-            elseif(Mage::getStoreConfig('carriers/bpost_clickcollect/activated') == 1){
+            elseif($configHelper->getBpostCarriersConfig('activated', 'bpost_clickcollect') == 1){
                 Mage::getConfig()->saveConfig('carriers/bpost_clickcollect/activated', '0');
                 Mage::getConfig()->saveConfig('carriers/bpost_clickcollect/active', '0');
                 Mage::app()->getCacheInstance()->cleanType('config');

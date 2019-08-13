@@ -284,7 +284,9 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
      * @return boolean|string
      */
     public function getBpostStatus($order){
-        $apiModel = Mage::getModel("bpost_shm/api", true);
+        /** @var Bpost_ShM_Model_Api $apiModel */
+        $apiModel = Mage::getModel('bpost_shm/api');
+        $apiModel->initialize($order->getStoreId());
         $apiResponse = $apiModel->retrieveOrderDetails($order);
 
         if(!$apiResponse){

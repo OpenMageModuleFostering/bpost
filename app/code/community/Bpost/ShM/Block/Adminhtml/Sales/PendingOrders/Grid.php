@@ -22,22 +22,32 @@ class Bpost_ShM_Block_Adminhtml_Sales_PendingOrders_Grid extends Bpost_ShM_Block
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('sales/order_grid_collection');
-        $collection->getSelect()->join(Mage::getConfig()->getTablePrefix() . 'sales_flat_order as sfo', 'sfo.entity_id=`main_table`.entity_id', array(
-            'shipping_method' => 'shipping_method',
-            'total_qty_ordered' => 'ROUND(total_qty_ordered,0)',
-            'bpost_label_exported' => 'bpost_label_exported',
-            'bpost_label_exists' => 'bpost_label_exists',
-            'bpost_drop_date' => 'bpost_drop_date',
-            'bpost_status' => 'bpost_status',
-            'state' => 'state'
-        ));
-        $collection->addAttributeToFilter('shipping_method', array('like' => '%bpostshm%'));
+        $collection->getSelect()->join(
+            Mage::getConfig()->getTablePrefix() . 'sales_flat_order as sfo', 
+            'sfo.entity_id=`main_table`.entity_id', 
+            array(
+                'shipping_method' => 'shipping_method',
+                'total_qty_ordered' => 'ROUND(sfo.total_qty_ordered,0)',
+                'bpost_label_exported' => 'bpost_label_exported',
+                'bpost_label_exists' => 'bpost_label_exists',
+                'bpost_drop_date' => 'bpost_drop_date',
+                'bpost_status' => 'bpost_status',
+                'state' => 'state'
+            )
+        );
+        $collection->addExpressionFieldToSelect(
+            'shipping_customer_name',
+            "IF(sfo.shipping_method='bpostshm_bpost_international', CONCAT('International: ', main_table.shipping_name), main_table.shipping_name)" ,
+            'shipping_customer_name'
+        );
+        $collection->addAttributeToFilter('sfo.shipping_method', array('like' => '%bpostshm%'));
         $collection->addAttributeToFilter('main_table.status', array('nin' => array('complete', 'closed', 'canceled')));
 
         $this->setCollection($collection);
         parent::_prepareCollection();
 
-        if (Mage::getStoreConfig('shipping/bpost_shm/display_delivery_date')) {
+        $configHelper = Mage::helper('bpost_shm/system_config');
+        if ($configHelper->getBpostShippingConfig('display_delivery_date', $this->getStore())) {
             $this->_setCollectionOrder($this->_columns['bpost_drop_date']);
         }
 

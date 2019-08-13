@@ -67,7 +67,8 @@ class Bpost_ShM_Model_Api extends Bpost_ShM_Model_Api_Abstract
 
         //now we create a new dom element
         //we use the domcreator class for this
-        $domCreator = Mage::getModel("bpost_shm/api_domcreator", true);
+        $domCreator = Mage::getModel("bpost_shm/api_domcreator");
+        $domCreator->initialize($order->getStoreId());
         $document = $domCreator->getCreateOrderDomDocument($order, $returnOrder);
 
         $errorHandlingData = array("request_name" => "createOrder", "order_id" => $order->getIncrementId());

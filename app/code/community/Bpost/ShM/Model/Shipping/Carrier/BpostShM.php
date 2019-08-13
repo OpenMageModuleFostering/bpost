@@ -168,7 +168,7 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
     protected function _getCarriersErrorMessage($shippingMethodCode)
     {
         $error = Mage::getModel('shipping/rate_result_error');
-        $msg = Mage::getStoreConfig("carriers/$shippingMethodCode/specificerrmsg");
+        $msg = $this->getBpostConfigData('specificerrmsg', $shippingMethodCode);
 
         if ($msg && $msg != '') {
             $error->setData("error_message", $msg);
@@ -188,11 +188,11 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
     public function getAllowedMethods()
     {
         $allowedMethods = array(
-            'bpost_homedelivery' => Mage::getStoreConfig('carriers/bpost_homedelivery/name', $this->getStore()),
-            'bpost_international' => Mage::getStoreConfig('carriers/bpost_international/name', $this->getStore()),
-            'bpost_parcellocker' => Mage::getStoreConfig('carriers/bpost_parcellocker/name', $this->getStore()),
-            'bpost_pickuppoint' => Mage::getStoreConfig('carriers/bpost_pickuppoint/name', $this->getStore()),
-            'bpost_clickcollect' => Mage::getStoreConfig('carriers/bpost_clickcollect/name', $this->getStore())
+            'bpost_homedelivery' => $this->getBpostConfigData('name', 'bpost_homedelivery'),
+            'bpost_international' => $this->getBpostConfigData('name', 'bpost_international'),
+            'bpost_parcellocker' => $this->getBpostConfigData('name', 'bpost_parcellocker'),
+            'bpost_pickuppoint' => $this->getBpostConfigData('name', 'bpost_pickuppoint'),
+            'bpost_clickcollect' => $this->getBpostConfigData('name', 'bpost_clickcollect')
         );
 
         return $allowedMethods;
@@ -210,8 +210,12 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
         if (empty($code)) {
             return false;
         }
-        $path = 'carriers/' . $code . '/' . $field;
-        return Mage::getStoreConfig($path, $this->getStore());
+
+        return Mage::helper('bpost_shm/system_config')->getBpostCarriersConfig(
+            $field,
+            $code,
+            $this->getStore()
+        );
     }
 
     /**

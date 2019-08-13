@@ -37,7 +37,9 @@ class Bpost_ShM_Model_Returnlabel extends Mage_Core_Model_Abstract
         $returnLabelHelper = Mage::helper("bpost_shm/returnlabel");
 
         //check for return order
-        $returnlabelResponse = Mage::getModel('bpost_shm/api', true)->createReturnLabel($order);
+        $api = Mage::getModel('bpost_shm/api');
+        $api->initialize($order->getStoreId());
+        $returnlabelResponse = $api->createReturnLabel($order);
 
         if(!$returnlabelResponse){
             Mage::throwException("Failed to create a return label. Please check your error logs.");

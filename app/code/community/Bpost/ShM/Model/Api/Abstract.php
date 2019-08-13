@@ -52,13 +52,20 @@ class Bpost_ShM_Model_Api_Abstract extends Mage_Core_Model_Abstract
     }
 
 
-    //we set the api domain, account id and passphrase
-    public function initialize(){
-        $configHelper = Mage::helper("bpost_shm/system_config");
+    /**
+     * Set the api domain, account id and passphrase of the given store
+     *
+     * @param null|int $storeId
+     */
+    public function initialize($storeId = null)
+    {
+        if (!$storeId) {
+            $storeId = Mage::app()->getStore()->getId();
+        }
 
-        $this->_apiUriBase = $configHelper->getBpostShippingConfig("api_url", Mage::app()->getStore()->getId());
-        $this->_accountId = $this->_bpostConfigHelper->getBpostShippingConfig("accountid", Mage::app()->getStore()->getId());
-        $this->_passphrase = $this->_bpostConfigHelper->getBpostShippingConfig("passphrase", Mage::app()->getStore()->getId());
+        $this->_apiUriBase = $this->_bpostConfigHelper->getBpostShippingConfig('api_url', $storeId);
+        $this->_accountId = $this->_bpostConfigHelper->getBpostShippingConfig('accountid', $storeId);
+        $this->_passphrase = $this->_bpostConfigHelper->getBpostShippingConfig('passphrase', $storeId);
         $this->_authorization = base64_encode($this->_accountId . ':' . $this->_passphrase);
         $this->_initialized = true;
     }

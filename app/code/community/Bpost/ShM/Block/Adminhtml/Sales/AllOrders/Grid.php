@@ -21,17 +21,27 @@ class Bpost_ShM_Block_Adminhtml_Sales_AllOrders_Grid extends Bpost_ShM_Block_Adm
      */
     protected function _prepareCollection()
     {
+        /** @var Mage_Sales_Model_Resource_Order_Grid_Collection $collection */
         $collection = Mage::getResourceModel('sales/order_grid_collection');
-        $collection->getSelect()->join(Mage::getConfig()->getTablePrefix() . 'sales_flat_order as sfo', 'sfo.entity_id=`main_table`.entity_id', array(
-            'shipping_method' => 'shipping_method',
-            'total_qty_ordered' => 'ROUND(total_qty_ordered,0)',
-            'bpost_label_exported' => 'bpost_label_exported',
-            'bpost_label_exists' => 'bpost_label_exists',
-            'bpost_drop_date' => 'bpost_drop_date',
-            'bpost_status' => 'bpost_status',
-            'state' => 'state'
-        ));
-        $collection->addAttributeToFilter('shipping_method', array('like' => '%bpostshm%'));
+        $collection->getSelect()->join(
+            Mage::getConfig()->getTablePrefix() . 'sales_flat_order as sfo',
+            'sfo.entity_id=`main_table`.entity_id',
+            array(
+                'shipping_method' => 'shipping_method',
+                'total_qty_ordered' => 'ROUND(sfo.total_qty_ordered,0)',
+                'bpost_label_exported' => 'bpost_label_exported',
+                'bpost_label_exists' => 'bpost_label_exists',
+                'bpost_drop_date' => 'bpost_drop_date',
+                'bpost_status' => 'bpost_status',
+                'state' => 'state'
+            )
+        );
+        $collection->addExpressionFieldToSelect(
+            'shipping_customer_name',
+            "IF(sfo.shipping_method='bpostshm_bpost_international', CONCAT('International: ', main_table.shipping_name), main_table.shipping_name)" ,
+            'shipping_customer_name'
+        );
+        $collection->addAttributeToFilter('sfo.shipping_method', array('like' => '%bpostshm%'));
         $this->setCollection($collection);
 
         parent::_prepareCollection();

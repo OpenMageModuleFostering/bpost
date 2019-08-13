@@ -243,7 +243,8 @@ class Bpost_ShM_Model_Adminhtml_Bpostgrid extends Varien_Event_Observer
     {
         $bpostHelper = Mage::helper("bpost_shm");
 
-        $webserviceModel = Mage::getModel("bpost_shm/api", true);
+        $webserviceModel = Mage::getModel('bpost_shm/api');
+        $webserviceModel->initialize($order->getStoreId());
         $response = $webserviceModel->createOrder($order);
 
         if (!$response) {
@@ -268,7 +269,8 @@ class Bpost_ShM_Model_Adminhtml_Bpostgrid extends Varien_Event_Observer
         $bpostHelper = Mage::helper("bpost_shm");
         $pdfName = null;
 
-        $webserviceModel = Mage::getModel("bpost_shm/api", true);
+        $webserviceModel = Mage::getModel('bpost_shm/api');
+        $webserviceModel->initialize($order->getStoreId());
         $response = $webserviceModel->createLabelByOrder($order, $this->_addReturnLabels);
 
         if ($response) {

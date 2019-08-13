@@ -263,7 +263,8 @@ class Bpost_ShM_Model_Observer extends Varien_Event_Observer
             $manageLabels = $configHelper->getBpostShippingConfig("manage_labels_with_magento");
 
             if (!$manageLabels) {
-                $apiModel = Mage::getModel("bpost_shm/api", true);
+                $apiModel = Mage::getModel("bpost_shm/api");
+                $apiModel->initialize($order->getStoreId());
                 $apiModel->createOrder($order);
                 $order->setBpostReference($order->getIncrementId());
             }
