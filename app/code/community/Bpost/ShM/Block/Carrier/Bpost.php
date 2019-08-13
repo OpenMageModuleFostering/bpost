@@ -51,7 +51,7 @@ class Bpost_ShM_Block_Carrier_Bpost extends Mage_Core_Block_Template
             "location_postoffice_default_image" => $this->getSkinUrl('images/bpost/location_postoffice_default.png'),
             "location_postpoint_default_image" => $this->getSkinUrl('images/bpost/location_postpoint_default.png'),
             "location_parcellocker_default_image" => $this->getSkinUrl('images/bpost/location_parcellocker_default.png'),
-            "base_url" => Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK, true),
+            "base_url" => Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK, Mage::app()->getStore()->isCurrentlySecure()),
             "datepicker_display" => (bool)$configHelper->getBpostShippingConfig("display_delivery_date", Mage::app()->getStore()->getId()),
             "datepicker_choose" => (bool)$configHelper->getBpostShippingConfig("choose_delivery_date", Mage::app()->getStore()->getId()),
             "datepicker_text" => $bpostHelper->__("Select your preferred delivery date"),

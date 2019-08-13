@@ -190,7 +190,7 @@ Bpost.ShM = Class.create({
             } else {
                 $$('input[name="bpost[deliverydate]"]').first().removeClassName('required-entry');
             }
-
+            
             this.rePosition(target);
             //show delivery date option
             this.deliveryDate(target);
