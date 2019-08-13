@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Bpost_ShM>
-            <version>1.3.1</version>
+            <version>1.3.2</version>
         </Bpost_ShM>
     </modules>
     <global>

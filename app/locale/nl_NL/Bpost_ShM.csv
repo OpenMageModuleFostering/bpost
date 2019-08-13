@@ -255,3 +255,4 @@
 "Please note that the Click & Collect points are updated once a day.","De Click & Collect afhaalpunten worden elke dag geüpdatet."
 "If you have added or removed Click & Collect points in Shipping Manager, be aware that it will take up to 24h to be operational in the bpost Magento plugin.","Als u een Click & Collect punt toevoegt of verwijdert in uw Shipping Manager, duurt het 24u vooraleer dit operationeel wordt in uw bpost plugin voor Magento."
 "If the points don’t appear after 24h, make sure to have cleared the Magento cache.","Als u deze afhaalpunten niet ziet verschijnen na 24u, verzeker u er dan van dat u de Magento cache hebt geleegd."
+"Before using this delivery method, make sure that Click & Collect is duely activated. This is a 2 step process. Find out how here.","Vooraleer u met deze leveringsmethode van start kun gaan, moeten volgende activaties gebeurd zijn."

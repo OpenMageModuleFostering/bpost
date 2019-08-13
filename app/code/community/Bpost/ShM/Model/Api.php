@@ -10,6 +10,11 @@
 
 class Bpost_ShM_Model_Api extends Bpost_ShM_Model_Api_Abstract
 {
+    CONST TYPE_PICKUP_POINT     = 3;
+    CONST TYPE_PARCEL_LOCKER    = 4;
+    CONST TYPE_CLICK_COLLECT    = 8;
+
+    
     /**
      * function returns the product configuration for a specific customer
      */
@@ -173,7 +178,7 @@ class Bpost_ShM_Model_Api extends Bpost_ShM_Model_Api_Abstract
      * language nl or fr
      * @return bool|Zend_Http_Response
      */
-    public function getNearestServicePoints($addressData = array(), $type = "3", $limit = 10, $language = false){
+    public function getNearestServicePoints($addressData = array(), $type = self::TYPE_PICKUP_POINT, $limit = 10, $language = false){
         $function = "search";
         $format = "xml";
 
@@ -183,19 +188,27 @@ class Bpost_ShM_Model_Api extends Bpost_ShM_Model_Api_Abstract
 
         $language = $this->_getCurrentLanguage($language);
 
-        $params = array("Type" => $type, "Limit" => $limit, "Language" => $language, "Function" => $function, "Format" => $format);
+        $params = array(
+            "Type" => $type,
+            "Limit" => $limit,
+            "Language" => $language,
+            "Function" => $function,
+            "Format" => $format,
+            "Zone" => $addressData["zone"],
+            "Partner" => $this->_getTaxiPostPartnerForType($type)
+        );
         //fixing PEBKAC issue (see Confluence)
         //$params["Street"] = $addressData["street"];
         //$params["Number"] = $addressData["number"];
-        $params["Zone"] = $addressData["zone"];
-        if($type == 8){
+
+        if ($type == self::TYPE_CLICK_COLLECT) {
             $params["CheckOpen"] = 0;
         }
+
         $response = $this->_callTaxipostApi($params);
+
         return $response->getBody();
     }
-
-
 
 
     /**
@@ -213,12 +226,20 @@ class Bpost_ShM_Model_Api extends Bpost_ShM_Model_Api_Abstract
      * language nl or fr
      * @return bool|Zend_Http_Response
      */
-    public function getServicePointDetails($servicePointId, $type = "3", $language = false){
+    public function getServicePointDetails($servicePointId, $type = self::TYPE_PICKUP_POINT, $language = false){
         $format = "xml";
 
         $language = $this->_getCurrentLanguage($language);
 
-        $params = array("Type" => $type, "Format" => $format, "Language" => $language, "Function" => "info", "Id" => $servicePointId);
+        $params = array(
+            "Type" => $type,
+            "Format" => $format,
+            "Language" => $language,
+            "Function" => "info",
+            "Id" => $servicePointId,
+            "Partner" => $this->_getTaxiPostPartnerForType($type)
+        );
+
         $response = $this->_callTaxipostApi($params);
 
         return $response->getBody();
@@ -240,10 +261,16 @@ class Bpost_ShM_Model_Api extends Bpost_ShM_Model_Api_Abstract
      * language nl or fr
      * @return bool|Zend_Http_Response
      */
-    public function getServicePointPage($servicePointId, $type = "3", $language = false){
+    public function getServicePointPage($servicePointId, $type = self::TYPE_PICKUP_POINT, $language = false){
         $language = $this->_getCurrentLanguage($language);
+        $params = array(
+            "Type" => $type,
+            "Language" => $language,
+            "Function" => "page",
+            "Id" => $servicePointId,
+            "Partner" => $this->_getTaxiPostPartnerForType($type)
+        );
 
-        $params = array("Type" => $type, "Language" => $language, "Function" => "page", "Id" => $servicePointId);
         $response = $this->_callTaxipostApi($params);
 
         return $response->getBody();
@@ -265,4 +292,21 @@ class Bpost_ShM_Model_Api extends Bpost_ShM_Model_Api_Abstract
 
         return $language;
     }
+
+    /**
+     * @param int $type
+     * @return string
+     */
+    protected function _getTaxiPostPartnerForType($type)
+    {
+        if ($type == self::TYPE_CLICK_COLLECT) {
+            $configHelper = Mage::helper("bpost_shm/system_config");
+            $storeId = Mage::app()->getStore()->getId();
+
+            return $configHelper->getBpostShippingConfig('accountid', $storeId);
+        }
+
+        return self::API_TAXIPOST_PARTNER;
+    }
+
 }

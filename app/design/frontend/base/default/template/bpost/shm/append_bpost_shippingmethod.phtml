@@ -13,11 +13,17 @@
     <div id="bpostresult"></div>
 
     <?php if($this->getCurrentShippingMethod() == "bpostshm_bpost_pickuppoint"){ ?>
-        <a href="#" id="selectPickupPoint" type="3"><?php echo $settings['select_text'] ?></a>
+        <a href="#" id="selectPickupPoint" type="<?php echo Bpost_ShM_Model_Api::TYPE_PICKUP_POINT; ?>">
+            <?php echo $settings['select_text'] ?>
+        </a>
     <?php }elseif($this->getCurrentShippingMethod() == "bpostshm_bpost_clickcollect"){ ?>
-        <a href="#" id="selectPickupPoint" type="8"><?php echo $settings['select_text_clickcollect'] ?></a>
+        <a href="#" id="selectPickupPoint" type="<?php echo Bpost_ShM_Model_Api::TYPE_CLICK_COLLECT; ?>">
+            <?php echo $settings['select_text_clickcollect'] ?>
+        </a>
     <?php }else{ ?>
-        <a href="#" id="selectPickupPoint" type="4"><?php echo $settings['select_text_parcel_locker'] ?></a>
+        <a href="#" id="selectPickupPoint" type="<?php echo Bpost_ShM_Model_Api::TYPE_PARCEL_LOCKER; ?>">
+            <?php echo $settings['select_text_parcel_locker'] ?>
+        </a>
     <?php } ?>
 
     <input id="bpost-id" type="hidden" name="bpost[id]" class="validate-bpostspot validate-parcel validate-clickcollect"/>

@@ -194,12 +194,18 @@ class Bpost_ShM_Model_Api_Abstract extends Mage_Core_Model_Abstract
 
 
     /**
-     * @param $params
-     * function calls the taxipost api (for GE06 calls)
+     * Function calls the taxipost api (for GE06 calls)
+     *
+     * @param array $params
+     * @return bool
      */
     protected function _callTaxipostApi($params){
         $urlExtension = "Locator";
-        $params["Partner"] = self::API_TAXIPOST_PARTNER;
+
+        if (!isset($params["Partner"])) {
+            $params["Partner"] = self::API_TAXIPOST_PARTNER;
+        }
+
         $params["AppId"] = self::API_TAXIPOST_APPID;
 
         $httpClient = $this->_getTaxipostHttpClient($urlExtension);
