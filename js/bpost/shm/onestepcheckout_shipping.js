@@ -5,14 +5,15 @@ Bpost.ShM.addMethods({
         this.settings = settings;
         this.container = $$('.shipment-methods')[0];
 
-        $$(".page")[0].insert({'before': $("bpost-info-wrapper")});
+        $$(".onestepcheckout-index-index")[0].insert({'before': $("bpost-info-wrapper")});
 
         this.googleMapsPopupContainer = $('bpost-info-wrapper');
         this.googleMapsPopup = new Control.Modal(this.googleMapsPopupContainer, {
             overlayOpacity: 0.65,
             fade: true,
             fadeDuration: 0.3,
-            position: 'center'
+            position: 'center',
+            destroyOnClose: true
         });
 
 

@@ -374,7 +374,14 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
 
             $searchString = $shippingAddress->getStreet(1).', '.$shippingAddress->getPostcode().', '.$shippingAddress->getCountry();
             $geoCode = Mage::getModel("bpost_shm/shipping_geocode")->callGoogleMaps($searchString);
-            $latLng = $geoCode->getLatLng();
+
+            if(is_object($geoCode) && $geoCode->getLatLng() != "" && $geoCode->getLatLng() != null){
+                $latLng = $geoCode->getLatLng();
+            }
+            else{
+                return $geoCode;
+            }
+
 
             $address = $this->formatShippingAddress($shippingAddress);
         }

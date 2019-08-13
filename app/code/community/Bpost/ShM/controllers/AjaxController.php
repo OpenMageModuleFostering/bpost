@@ -22,6 +22,12 @@ class Bpost_ShM_AjaxController extends Mage_Core_Controller_Front_Action {
                 //make call and check if it returns an error.
                 $apiCall = Mage::helper("bpost_shm")->getBpostSpots();
             }
+            if(!is_array($apiCall)){
+                $payloadFull = array("error" => Mage::helper("bpost_shm")->__('Your address could not be determined, please return to the shipping address step to correct it.'), "poilist" => $apiCall, "coordinates" => "");
+                $this->getResponse()->setHeader('Content-type', 'application/json');
+                $this->getResponse()->setBody(json_encode($payloadFull));
+                return;
+            }
 
             $error = array();
             $xml = simplexml_load_string($apiCall['poiList']);

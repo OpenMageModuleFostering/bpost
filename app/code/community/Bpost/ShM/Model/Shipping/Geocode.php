@@ -54,33 +54,39 @@ class Bpost_ShM_Model_Shipping_Geocode
                     return $this;
                     break;
                 case "ZERO_RESULTS":
-                    Mage::helper('bpost_shm')->log("Geocode: no results found for ".$this->_addressLine,Zend_Log::DEBUG);
-                    return false;
+                    $errormsg = "Geocode: no results found for ".$this->_addressLine;
+                    Mage::helper('bpost_shm')->log($errormsg, Zend_Log::ERR);
+                    return $errormsg;
                     break;
                 case "OVER_QUERY_LIMIT":
-                    Mage::helper('bpost_shm')->log("Geocode: Over Query Limit. check your api console",Zend_Log::WARN);
-                    return false;
+                    $errormsg = "Geocode: Over Query Limit. check your api console";
+                    Mage::helper('bpost_shm')->log($errormsg, Zend_Log::ERR);
+                    return $errormsg;
                     break;
                 case "REQUEST_DENIED":
-                    Mage::helper('bpost_shm')->log("Geocode: Request denied",Zend_Log::WARN);
-                    return false;
+                    $errormsg = "Geocode: Request denied";
+                    Mage::helper('bpost_shm')->log($errormsg, Zend_Log::ERR);
+                    return $errormsg;
                     break;
                 case "INVALID_REQUEST":
-                    Mage::helper('bpost_shm')->log("Geocode: invalid request , address missing?",Zend_Log::WARN);
-                    return false;
+                    $errormsg = "Geocode: invalid request , address missing?";
+                    Mage::helper('bpost_shm')->log($errormsg, Zend_Log::ERR);
+                    return $errormsg;
                     break;
                 case "UNKNOWN_ERROR":
-                    Mage::helper('bpost_shm')->log("Geocode: unknown Error",Zend_Log::WARN);
-                    return false;
+                    $errormsg = "Geocode: unknown Error";
+                    Mage::helper('bpost_shm')->log($errormsg, Zend_Log::ERR);
+                    return $errormsg;
                     break;
                 default:
-                    Mage::helper('bpost_shm')->log("Geocode: unknown Status",Zend_Log::WARN);
-                    return false;
+                    $errormsg = "Geocode: unknown Status";
+                    Mage::helper('bpost_shm')->log($errormsg, Zend_Log::ERR);
+                    return $errormsg;
                     break;
             }
         }catch (Exception $e){
             Mage::helper('bpost_shm')->log("Geocode: ". $e->getMessage() ,Zend_Log::ERR);
-            return false;
+            return $e-getMessage();
         }
     }
 

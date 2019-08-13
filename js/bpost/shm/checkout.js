@@ -229,6 +229,7 @@ Bpost.ShM = Class.create({
 
         if(this.settings.onestepcheckout_active == true){
             $("bpost-info-wrapper").removeClassName("active");
+
             this.googleMapsPopup.close();
         }
 
@@ -248,6 +249,9 @@ Bpost.ShM = Class.create({
         }
 
         this.map = null;
+        if($('control_overlay') !== undefined && $('control_overlay') !== null){
+            $('control_overlay').remove();
+        }
     },
     rePosition: function (target){
         activeOption = target.id;
@@ -417,7 +421,8 @@ Bpost.ShM = Class.create({
                 }
             }.bind(this),
             onFailure: function () {
-                alert("Could not contact the server, please try again");
+                var json = transport.responseText.evalJSON(true);
+                alert(json.error);
                 this.bpostClose();
             }
         });
@@ -448,12 +453,19 @@ Bpost.ShM = Class.create({
                     }
                     this.reloadMarkers();
                 } else {
+                    if(this.json.poilist != undefined){
+                        console.log(this.json.poilist);
+                    }
                     alert(this.json.error);
                     this.bpostClose();
                 }
             }.bind(this),
             onFailure: function () {
-                alert("Could not contact the server, please try again");
+                this.json = transport.responseText.evalJSON(true);
+                if(this.json.poilist != undefined){
+                    console.log(this.json.poilist);
+                }
+                alert(this.json.error);
                 this.topClose();
             },
             onComplete: function () {
@@ -940,13 +952,13 @@ Bpost.ShM = Class.create({
                             $("bpost-info-wrapper").removeClassName("active");
                             this.googleMapsPopup.close();
                         }
-
                         alert(json.error);
                         this.bpostClose();
                     }
                 }.bind(this),
                 onFailure: function () {
-                    alert("Could not contact the server, please try again.");
+                    var json = transport.responseText.evalJSON(true);
+                    alert(json.error);
                     this.bpostClose();
                 },
                 onComplete: function () {
