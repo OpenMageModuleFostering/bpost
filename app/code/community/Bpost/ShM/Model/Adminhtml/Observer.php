@@ -137,16 +137,6 @@ class Bpost_ShM_Model_Adminhtml_Observer extends Varien_Event_Observer
 
 
     /**
-     * @param $observer
-     */
-    public function sales_order_shipment_grid_collection_load_before($observer){
-        //join data from sale_flat_shipment to sale_flat_shipment_grid
-        $collection = $observer->getOrderShipmentGridCollection();
-        $collection->addFieldToSelect("bpost_status");
-    }
-
-
-    /**
      * @return $this
      * function triggered when saving shipping settings bpost module
      * checks if authentication is valid

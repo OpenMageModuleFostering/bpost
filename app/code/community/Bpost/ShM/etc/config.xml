@@ -157,41 +157,41 @@
                 </observers>
             </controller_action_predispatch_onestepcheckout_index_index>
 
-            <controller_action_predispatch_checkout_onepage_saveBilling>
+            <controller_action_predispatch_checkout_onepage_savebilling>
                 <observers>
-                    <bpost_shm_controller_action_predispatch_checkout_onepage_saveBilling>
+                    <bpost_shm_controller_action_predispatch_checkout_onepage_savebilling>
                         <class>bpost_shm/observer</class>
                         <method>controller_action_predispatch_checkout_onepage_saveAddress</method>
-                    </bpost_shm_controller_action_predispatch_checkout_onepage_saveBilling>
+                    </bpost_shm_controller_action_predispatch_checkout_onepage_savebilling>
                 </observers>
-            </controller_action_predispatch_checkout_onepage_saveBilling>
+            </controller_action_predispatch_checkout_onepage_savebilling>
 
-            <controller_action_predispatch_checkout_onepage_saveShipping>
+            <controller_action_predispatch_checkout_onepage_saveshipping>
                 <observers>
-                    <bpost_shm_controller_action_predispatch_checkout_onepage_saveShipping>
+                    <bpost_shm_controller_action_predispatch_checkout_onepage_saveshipping>
                         <class>bpost_shm/observer</class>
                         <method>controller_action_predispatch_checkout_onepage_saveAddress</method>
-                    </bpost_shm_controller_action_predispatch_checkout_onepage_saveShipping>
+                    </bpost_shm_controller_action_predispatch_checkout_onepage_saveshipping>
                 </observers>
-            </controller_action_predispatch_checkout_onepage_saveShipping>
+            </controller_action_predispatch_checkout_onepage_saveshipping>
 
-            <controller_action_postdispatch_checkout_onepage_saveBilling>
+            <controller_action_postdispatch_checkout_onepage_savebilling>
                 <observers>
-                    <bpost_shm_controller_action_postdispatch_checkout_onepage_saveBilling>
+                    <bpost_shm_controller_action_postdispatch_checkout_onepage_savebilling>
                         <class>bpost_shm/observer</class>
                         <method>controller_action_postdispatch_checkout_onepage_saveAddress</method>
-                    </bpost_shm_controller_action_postdispatch_checkout_onepage_saveBilling>
+                    </bpost_shm_controller_action_postdispatch_checkout_onepage_savebilling>
                 </observers>
-            </controller_action_postdispatch_checkout_onepage_saveBilling>
+            </controller_action_postdispatch_checkout_onepage_savebilling>
 
-            <controller_action_postdispatch_checkout_onepage_saveShipping>
+            <controller_action_postdispatch_checkout_onepage_saveshipping>
                 <observers>
-                    <bpost_shm_controller_action_postdispatch_checkout_onepage_saveShipping>
+                    <bpost_shm_controller_action_postdispatch_checkout_onepage_saveshipping>
                         <class>bpost_shm/observer</class>
                         <method>controller_action_postdispatch_checkout_onepage_saveAddress</method>
-                    </bpost_shm_controller_action_postdispatch_checkout_onepage_saveShipping>
+                    </bpost_shm_controller_action_postdispatch_checkout_onepage_saveshipping>
                 </observers>
-            </controller_action_postdispatch_checkout_onepage_saveShipping>
+            </controller_action_postdispatch_checkout_onepage_saveshipping>
 
             <controller_action_postdispatch_onestepcheckout_ajax_save_billing>
                 <observers>
@@ -275,16 +275,7 @@
                     </bpost_shm_prepare_grid_collection_after>
                 </observers>
             </bpost_shm_prepare_grid_collection_after>
-
-            <sales_order_shipment_grid_collection_load_before>
-                <observers>
-                    <bpost_shm_order_shipment_grid_collection_load_before>
-                        <class>bpost_shm/adminhtml_observer</class>
-                        <method>sales_order_shipment_grid_collection_load_before</method>
-                    </bpost_shm_order_shipment_grid_collection_load_before>
-                </observers>
-            </sales_order_shipment_grid_collection_load_before>
-
+            
             <sales_order_shipment_save_before>
                 <observers>
                     <bpost_shm_sales_order_shipment_save_before>

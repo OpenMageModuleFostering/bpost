@@ -68,8 +68,8 @@ class Bpost_ShM_Model_Observer extends Varien_Event_Observer
         $checkoutSession = Mage::getSingleton('checkout/session');
         $shippingAddress = $checkoutSession->getQuote()->getShippingAddress();
         if (((bool)$shippingAddress->getSameAsBilling() &&
-            $observer->getEvent()->getName() == "controller_action_postdispatch_checkout_onepage_saveBilling") ||
-            $observer->getEvent()->getName() == "controller_action_postdispatch_checkout_onepage_saveShipping") {
+            $observer->getEvent()->getName() == "controller_action_postdispatch_checkout_onepage_savebilling") ||
+            $observer->getEvent()->getName() == "controller_action_postdispatch_checkout_onepage_saveshipping") {
 
             $originalAddress = new Varien_Object();
             $street = $shippingAddress->getStreet(1);
@@ -238,32 +238,33 @@ class Bpost_ShM_Model_Observer extends Varien_Event_Observer
      * @param $observer
      * @return $this
      */
-    public function checkout_submit_all_after($observer){
+    public function checkout_submit_all_after($observer)
+    {
         $checkoutSession = Mage::getSingleton('checkout/session');
         $quote = $checkoutSession->getQuote();
-        $order = $observer->getEvent()->getOrder();
 
-        $configHelper = Mage::helper("bpost_shm/system_config");
+        if (strpos($quote->getShippingAddress()->getShippingMethod(), "bpostshm_bpost") !== false) {
+            $order = $observer->getEvent()->getOrder();
 
-        if($quote->getShippingAddress()->getShippingMethod()){
+            $configHelper = Mage::helper("bpost_shm/system_config");
+
             $displayDeliveryDates = $configHelper->getBpostShippingConfig("display_delivery_date", Mage::app()->getStore()->getId());
             $order->setBpostPickuplocationId($quote->getBpostPickuplocationId());
 
-            if($displayDeliveryDates) {
+            if ($displayDeliveryDates) {
                 $order->setBpostDisableSaturdayDelivery($quote->getBpostDisableSaturdayDelivery());
             }
 
+            //function checks if manage labels with Magento is disabled
+            //if so, we need to call the create order api function
+            $manageLabels = $configHelper->getBpostShippingConfig("manage_labels_with_magento");
+
+            if (!$manageLabels) {
+                $apiModel = Mage::getModel("bpost_shm/api", true);
+                $apiModel->createOrder($order);
+                $order->setBpostReference($order->getIncrementId());
+            }
             $order->save();
-        }
-
-        //function checks if manage labels with Magento is disabled
-        //if so, we need to call the create order api function
-        $manageLabels = $configHelper->getBpostShippingConfig("manage_labels_with_magento");
-
-        if(!$manageLabels){
-            $apiModel = Mage::getModel("bpost_shm/api", true);
-            $apiModel->createOrder($order);
-            $order->setBpostReference($order->getIncrementId())->save();
         }
 
         return $this;
