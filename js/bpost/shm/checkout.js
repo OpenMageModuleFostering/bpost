@@ -315,10 +315,16 @@ Bpost.ShM = Class.create({
             var pickDates = '<ul>';
             var datepickArray = dates;
             var dates = datepickArray[currMethod];
-            var addClass = '';
-
             for (var i = 0; i < dates.length; i++) {
-                pickDates += '<li><label for="bpost-datepicker-'+i+'"><input type="radio" name="bpost[deliverydate]" id="bpost-datepicker-'+i+'" value="'+dates[i]['date']+'" /> '+dates[i]['date_format']+'</label></li>';
+                var date = new Date(dates[i]['date']);
+                window.clickVar = "";
+                if(date.getDay() == 6){
+                    clickVar="window.isSaturdaySelected = true;";
+                }
+                else{
+                    clickVar="window.isSaturdaySelected = false;";
+                }
+                pickDates += '<li><label for="bpost-datepicker-'+i+'"><input type="radio" name="bpost[deliverydate]" onclick="'+clickVar+'" id="bpost-datepicker-'+i+'" value="'+dates[i]['date']+'" /> '+dates[i]['date_format']+'</label></li>';
             }
             //add hidden input for validation message position
             pickDates += '<li><input type="radio" name="bpost[deliverydate]" class="validate-multiple-delivery-dates" id="bpost-datepicker-advice" style="display: none;" /></li>';
@@ -345,7 +351,6 @@ Bpost.ShM = Class.create({
             //saturday delivery option
             if(datepickArray[currMethod]['is_saturday']) {
                 $$('.bpost-saturday-delivery')[0].style.display = 'block';
-
                 if($('bpost-saturday').checked) {
                     displayDate.innerHTML = datepickArray[currMethod]['next_date_format'];
                     displayDate.style.display = 'block';
@@ -561,7 +566,7 @@ Bpost.ShM = Class.create({
         '</div>' +
         '</form></div>';
         this.html_clear = '<div style="clear:both;"></div>';
-        this.html_close = '<div class="bpost-close-wrapper"><a class="bpost-close btn-bpost">Close</a></div>';
+        this.html_close = '<div class="bpost-close-wrapper"><a class="bpost-close btn-bpost">'+this.settings.close_label+'</a></div>';
         this.html_list = '<ul class="list" id="bpostlist"></ul>';
         this.html_map = '<div id="map-canvas" class="map"></div>';
         this.html_loading = '<div class="bpost_loading"><span class="ajaxloading"></span><div class="image"></div><span class="bpost-please-wait">' + this.settings.label_loading + '</span></div>';
@@ -746,7 +751,7 @@ Bpost.ShM = Class.create({
                 '<p>' + this.json.poilist.Poi[i].Record.Street + ' ' + this.json.poilist.Poi[i].Record.Number +
                 '<br />' + this.json.poilist.Poi[i].Record.Zip + ' ' + this.json.poilist.Poi[i].Record.City +
                 '</p><ul class="hours"></ul>' +
-                '<a href="#" data-shopid="' + this.json.poilist.Poi[i].Record.Id + '" class="selectspot">Select &raquo;</a>');
+                '<a href="#" data-shopid="' + this.json.poilist.Poi[i].Record.Id + '" class="selectspot">'+this.settings.label_select+' &raquo;</a>');
 
                 //add opening hours
                 spots.push({

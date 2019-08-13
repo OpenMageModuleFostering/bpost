@@ -14,7 +14,7 @@
 class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carrier_Abstract
     implements Mage_Shipping_Model_Carrier_Interface
 {
-    const SHIPMENT_TRACK_DOMAIN  = "http://track.bpost.be/";
+    const SHIPMENT_TRACK_DOMAIN = "http://track.bpost.be/";
 
     protected $_code = 'bpostshm';
     protected $_isFixed = true;
@@ -32,7 +32,9 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
 
         $helper = Mage::helper("bpost_shm");
         $configHelper = Mage::helper("bpost_shm/system_config");
-        $quote = Mage::getSingleton('checkout/session')->getQuote();
+        $checkoutSession = Mage::getSingleton('checkout/session');
+
+        $quote = $checkoutSession->getQuote();
         $ratePriceByMethod = array();
 
         foreach ($this->getAllowedMethods() as $shippingMethodCode => $shippingMethodName) {
@@ -46,7 +48,8 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
                 $price = $this->getBpostConfigData('flat_rate_price', $shippingMethodCode);
                 if ($request->getFreeShipping() === true ||
                     ($this->getBpostConfigData('free_shipping', $shippingMethodCode) &&
-                        $request->getPackageValue() >= $this->getBpostConfigData('free_shipping_from', $shippingMethodCode))) {
+                        $request->getPackageValue() >= $this->getBpostConfigData('free_shipping_from', $shippingMethodCode))
+                ) {
                     $price = 0;
                 }
             } else {
@@ -118,31 +121,30 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
             }
 
             $postCodeValidationResult = Mage::helper('bpost_shm')->validatePostcode($request->getDestCountryId(), $request->getDestPostcode());
-            if(($shippingMethodCode == 'bpost_homedelivery' || $shippingMethodCode == 'bpost_international') && $postCodeValidationResult != 'passed'){
+            if (($shippingMethodCode == 'bpost_homedelivery' || $shippingMethodCode == 'bpost_international') && $postCodeValidationResult != 'passed') {
                 $error = Mage::getModel('shipping/rate_result_error');
                 $error->setCarrier($this->_code);
                 $error->setCarrierTitle('Bpost ShippingManager');
-                $error->setData('error_message', Mage::helper('bpost_shm')->__('The Bpost shipping method "%s" is not available because your postal code is not correct.' .
-                ' For your country the format should be like "%s". Please correct the postal code in your shipping address.',$shippingMethodName, $postCodeValidationResult));
+                $error->setData('error_message', Mage::helper('bpost_shm')->__('The Bpost shipping method "%s" is not available because your postal code is not correct. For your country the format should be like "%s". Please correct the postal code in your shipping address.', $shippingMethodName, $postCodeValidationResult));
                 $result->append($error);
                 continue;
             }
 
             $saturdayDeliveryCost = $helper->formatSaturdayDeliveryCost($configHelper->getBpostShippingConfig("saturday_delivery_cost", Mage::app()->getStore()->getId()));
-            $saturdayDeliveryActiveByCarrier = $helper->formatSaturdayDeliveryCost($configHelper->getBpostCarriersConfig("saturday_delivery", $shippingMethodCode, Mage::app()->getStore()->getId()));
-            $ratePriceByMethod[$this->_code."_".$shippingMethodCode] = $price;
-
-            if(!$quote->getBpostDisableSaturdayDelivery() && $saturdayDeliveryActiveByCarrier) {
-                $shippingDates = $helper->getBpostShippingDates();
-                if(isset($shippingDates[$shippingMethodCode]) && $shippingDates[$shippingMethodCode]["is_saturday"] == 1){
-                    $price = $price + $saturdayDeliveryCost;
-                    $quote->setBpostSaturdayCostApplied(true)->save();
-                }
+            $saturdayDeliveryActiveByCarrier = $configHelper->getBpostCarriersConfig("saturday_delivery", $shippingMethodCode, Mage::app()->getStore()->getId());
+            $ratePriceByMethod[$this->_code . "_" . $shippingMethodCode] = $price;
+            if ((bool)$saturdayDeliveryActiveByCarrier &&
+                (bool)Mage::helper("bpost_shm/system_config")->getBpostShippingConfig("display_delivery_date") &&
+                !(bool)$checkoutSession->getQuote()->getData("bpost_disable_saturday_delivery")
+            ) {
+                $price = $price + $saturdayDeliveryCost;
+                $quote->setBpostSaturdayCostApplied(true)->save();
+            } else {
+                $quote->setBpostSaturdayCostApplied(false)->save();
             }
-
             $method->setCarrier($this->_code);
             $method->setMethod($shippingMethodCode);
-            $method->setMethodTitle($this->getBpostConfigData('name', $shippingMethodCode));
+            $method->setMethodTitle($helper->__($this->getBpostConfigData('name', $shippingMethodCode)));
             $method->setCarrierTitle('Bpost');
             $method->setPrice($price);
             $method->setCost($price);
@@ -153,7 +155,6 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
             return false;
         }
 
-        $checkoutSession = Mage::getSingleton('checkout/session');
         $checkoutSession->setOriginalRatePrices($ratePriceByMethod);
 
         return $result;
@@ -165,11 +166,12 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
      * @param $shippingMethodCode
      * @return Mage_Shipping_Model_Rate_Result_Error
      */
-    protected function _getCarriersErrorMessage($shippingMethodCode){
+    protected function _getCarriersErrorMessage($shippingMethodCode)
+    {
         $error = Mage::getModel('shipping/rate_result_error');
         $msg = Mage::getStoreConfig("carriers/$shippingMethodCode/specificerrmsg");
 
-        if($msg && $msg != ''){
+        if ($msg && $msg != '') {
             $error->setData("error_message", $msg);
         }
 
@@ -242,7 +244,7 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
         $collection = Mage::getResourceModel('sales/order_shipment_track_collection')
             ->addFieldToFilter('track_number', $tracking_number)
             ->addAttributeToSelect("order_id")
-            ->join('sales/order', 'order_id=`sales/order`.entity_id', array('increment_id'=>'increment_id', 'shipping_description' => 'shipping_description'), null,'left');
+            ->join('sales/order', 'order_id=`sales/order`.entity_id', array('increment_id' => 'increment_id', 'shipping_description' => 'shipping_description'), null, 'left');
         $orderId = $collection->getFirstItem()->getIncrementId();
         $carrierTitle = $collection->getFirstItem()->getShippingDescription();
         $tracking_result = Mage::getModel('shipping/tracking_result');
@@ -255,7 +257,7 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
         $trackDomainUrl = self::SHIPMENT_TRACK_DOMAIN;
         $tracking_status->addData(
             array(
-                'status' => '<a target="_blank" href="'.$trackDomainUrl.'etr/light/performSearch.do?searchByCustomerReference=true&oss_language=' . $localeExploded[0] . '&customerReference=' . $orderId . '"><img src="' . Mage::getDesign()->getSkinUrl('images/bpost/bpost_logo_RGB72_M.png') . '" /> <br />' . Mage::helper('bpost_shm')->__('Click here to track your bpost shipments.') . '</a>'
+                'status' => '<a target="_blank" href="' . $trackDomainUrl . 'etr/light/performSearch.do?searchByItemCode=true&oss_language=' . $localeExploded[0] . '&itemCodes=' . $tracking_number . '"><img src="' . Mage::getDesign()->getSkinUrl('images/bpost/bpost_logo_RGB72_M.png') . '" /> <br />' . Mage::helper('bpost_shm')->__('Click here to track your bpost shipments.') . '</a>'
             )
         );
         $tracking_result->append($tracking_status);
@@ -296,9 +298,9 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
         $bpostHelper = Mage::helper("bpost_shm/system_config");
         $countryId = $request->getDestCountryId();
 
-        if ($speCountriesAllow == 1){
+        if ($speCountriesAllow == 1) {
             $allowedCountries = $bpostHelper->getBpostCarriersConfig("specificcountry", "bpost_international");
-            $availableCountries = explode(',',$allowedCountries);
+            $availableCountries = explode(',', $allowedCountries);
 
             if (!empty($availableCountries) && in_array($countryId, $availableCountries)) {
                 return true;
@@ -308,10 +310,11 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
         }
 
         //we check on national shipping country Belgium
-        if(($shippingMethodCode === "bpost_homedelivery" ||
-            $shippingMethodCode === "bpost_parcellocker" ||
+        if (($shippingMethodCode === "bpost_homedelivery" ||
+                $shippingMethodCode === "bpost_parcellocker" ||
                 $shippingMethodCode === "bpost_pickuppoint") &&
-            $countryId != "BE"){
+            $countryId != "BE"
+        ) {
             return false;
         }
 
@@ -327,6 +330,6 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
      */
     public function getRate($request, $shippingMethodCode)
     {
-        return Mage::getResourceModel('bpost_shm/tablerates_' . str_replace('bpost_','',$shippingMethodCode))->getRate($request);
+        return Mage::getResourceModel('bpost_shm/tablerates_' . str_replace('bpost_', '', $shippingMethodCode))->getRate($request);
     }
 }

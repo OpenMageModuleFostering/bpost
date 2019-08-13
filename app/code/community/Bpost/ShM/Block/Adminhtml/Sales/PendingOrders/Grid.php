@@ -31,7 +31,7 @@ class Bpost_ShM_Block_Adminhtml_Sales_PendingOrders_Grid extends Bpost_ShM_Block
             'bpost_status' => 'bpost_status',
             'state' => 'state'
         ));
-        $collection->addAttributeToFilter('shipping_method', array('like' => '%bpost%'));
+        $collection->addAttributeToFilter('shipping_method', array('like' => '%bpostshm%'));
         $collection->addAttributeToFilter('main_table.status', array('nin' => array('complete', 'closed', 'canceled')));
 
         $this->setCollection($collection);

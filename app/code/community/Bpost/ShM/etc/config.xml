@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Bpost_ShM>
-            <version>0.1.8</version>
+            <version>1.0.1</version>
         </Bpost_ShM>
     </modules>
     <global>
@@ -11,7 +11,6 @@
                 <class>Bpost_ShM_Block</class>
             </bpost_shm>
         </blocks>
-
         <models>
             <bpost_shm>
                 <class>Bpost_ShM_Model</class>
@@ -378,7 +377,7 @@
                 <log_level>3</log_level>
                 <enable_log_api>1</enable_log_api>
                 <enable_log>1</enable_log>
-                <api_url>https://testapi.bpost.be</api_url>
+                <api_url>https://api.bpost.be</api_url>
                 <frontend_api_url>https://shippingmanager.bpost.be/ShmFrontEnd/start</frontend_api_url>
                 <sender_country>BE</sender_country>
                 <manage_labels_with_magento>1</manage_labels_with_magento>
@@ -388,7 +387,7 @@
                 <display_delivery_date>0</display_delivery_date>
                 <choose_delivery_date>0</choose_delivery_date>
                 <nr_of_delivery_days_shown>5</nr_of_delivery_days_shown>
-                <next_day_delivery_allowed_till>17,00,00</next_day_delivery_allowed_till>
+                <next_day_delivery_allowed_till>17,00</next_day_delivery_allowed_till>
                 <days_between_order_and_shipment>0</days_between_order_and_shipment>
                 <weight_unit>1</weight_unit>
             </bpost_shm>

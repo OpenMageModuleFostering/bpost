@@ -31,6 +31,7 @@ class Bpost_ShM_Block_Carrier_Bpost extends Mage_Core_Block_Template
             "saturday" => $bpostHelper->__('Saturday'),
             "sunday" => $bpostHelper->__('Sunday'),
             "closed" => $bpostHelper->__('Closed'),
+            "close_label" => $bpostHelper->__('Close'),
             "select_text" => $bpostHelper->__('Click here to choose a bpost pick-up point.'),
             "select_text_parcel_locker" => $bpostHelper->__('Click here to choose a bpost parcel locker point.'),
             "change_text" => $bpostHelper->__('Click here to change the bpost pick-up point.'),

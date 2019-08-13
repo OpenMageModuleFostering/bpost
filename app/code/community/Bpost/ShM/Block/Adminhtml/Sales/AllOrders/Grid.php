@@ -31,7 +31,7 @@ class Bpost_ShM_Block_Adminhtml_Sales_AllOrders_Grid extends Bpost_ShM_Block_Adm
             'bpost_status' => 'bpost_status',
             'state' => 'state'
         ));
-        $collection->addAttributeToFilter('shipping_method', array('like' => '%bpost%'));
+        $collection->addAttributeToFilter('shipping_method', array('like' => '%bpostshm%'));
         $this->setCollection($collection);
 
         parent::_prepareCollection();

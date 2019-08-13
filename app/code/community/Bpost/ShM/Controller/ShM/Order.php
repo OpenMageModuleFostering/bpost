@@ -26,10 +26,11 @@ class Bpost_ShM_Controller_ShM_Order extends Mage_Adminhtml_Controller_Action
 
         $messages = array("success" => array(), "error" => array(), "notice" => array());
 
-
         if (!is_array($orderIds)) {
             try {
-                $gridModel->generateAndCompleteOrder($orderIds);
+
+                $order = Mage::getModel("sales/order")->load($orderIds);
+                $gridModel->generateAndCompleteOrder($order);
 
                 if(!is_object(Mage::getSingleton('core/session')->getMessages()->getLastAddedMessage())){
                     $message = Mage::helper('bpost_shm')->__("Your label has been generated and statuses have been changed.");
@@ -44,9 +45,11 @@ class Bpost_ShM_Controller_ShM_Order extends Mage_Adminhtml_Controller_Action
         }else {
 
             try {
-                foreach ($orderIds as $orderId) {
+                $orderCollection = Mage::getModel("sales/order")->getCollection()->addFieldToFilter("entity_id", array("in" => $orderIds));
+
+                foreach ($orderCollection as $order) {
                     try {
-                        $counter += $gridModel->generateAndCompleteOrder($orderId);
+                        $counter += $gridModel->generateAndCompleteOrder($order);
                     } catch (Exception $e) {
                         Mage::helper('bpost_shm')->log($e->getMessage(), Zend_Log::ERR);
                         $messages["error"][] = $e->getMessage();
@@ -108,6 +111,7 @@ class Bpost_ShM_Controller_ShM_Order extends Mage_Adminhtml_Controller_Action
     {
         $orderIds = $this->getRequest()->getParam('entity_id');
         try {
+
             $fileName = Mage::getModel('bpost_shm/adminhtml_bpostgrid')->processUndownloadedLabels($orderIds);
 
             if (!$fileName) {

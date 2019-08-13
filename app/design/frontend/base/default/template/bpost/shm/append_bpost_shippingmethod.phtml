@@ -50,7 +50,7 @@
     <div class="cf"></div>
     <div class="bpost-saturday-delivery">
         <label for="bpost-saturday">
-            <input type="checkbox" <?php if($bpostHelper->getIsOnestepCheckout()){ echo 'onclick="get_methods_separate();"';}?> name="bpost_saturday_delivery" id="bpost-saturday" value="1" <?php if($this->getQuote()->getBpostDisableSaturdayDelivery() || is_null($this->getQuote()->getBpostDisableSaturdayDelivery())){echo 'checked="checked"';}?>/>
+            <input type="checkbox" <?php if($bpostHelper->getIsOnestepCheckout()){ echo 'onclick="stopObserving(); triggerAjaxCallGetSeparateSaveMethods(\'' . $this->getUrl('onestepcheckout/ajax/set_methods_separate', array('_secure'=>true)) . '\', false);"';}?> name="bpost_saturday_delivery" id="bpost-saturday" value="1" />
             <div class="bpost-label-text"><?php echo $settings['datepicker_saturday_delivery_text'] ?><?php if($this->getSaturdayDeliveryCost()) { ?><br /><small><?php echo sprintf($settings['datepicker_saturday_delivery_cost'], $this->getSaturdayDeliveryCost()) ?></small><?php } ?></div>
         </label>
     </div>
@@ -59,7 +59,8 @@
 
 <script type="text/javascript">
     window.onestepcheckout_set_methods_separate = '<?php echo $this->getUrl('onestepcheckout/ajax/set_methods_separate', array('_secure'=>true));?>';
-    window.bpostShM = new Bpost.ShM(<?php echo json_encode($settings); ?>, "<?php echo $this->getCurrentShippingMethod(); ?>");
+    window.bpostSettings = <?php echo json_encode($settings); ?>;
+    window.bpostShM = new Bpost.ShM(window.bpostSettings, "<?php echo $this->getCurrentShippingMethod(); ?>");
 
     Validation.add('validate-bpostspot', "<?php echo Mage::helper('bpost_shm')->__('Please select a bpost pick-up point'); ?>", function (v) {
         return !($('s_method_bpostshm_bpost_pickuppoint').checked && Validation.get('IsEmpty').test(v))

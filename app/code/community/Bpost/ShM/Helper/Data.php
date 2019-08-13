@@ -509,7 +509,7 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
         //quote object
         $quote = Mage::getSingleton('checkout/session')->getQuote();
         $grandTotal = $quote->getGrandTotal();
-
+        $shippingCost = $quote->getShippingAddress()->getData('shipping_incl_tax');
         //bpost helper
         $helper = Mage::helper('bpost_shm');
 
@@ -548,9 +548,8 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
             //get saturday delivery flags
             $saturdayDelivery = (bool)$configHelper->getBpostCarriersConfig("saturday_delivery", $method, Mage::app()->getStore()->getId());
             $saturdayDeliveryFrom = $this->formatSaturdayDeliveryCost($configHelper->getBpostCarriersConfig("saturday_delivery_from", $method, Mage::app()->getStore()->getId()));
-
             //don't allow saturday delivery if saturday delivery 'yes' and 'as from' amount not exceeded
-            if($grandTotal < $saturdayDeliveryFrom) {
+            if(($grandTotal - $shippingCost) < $saturdayDeliveryFrom) {
                 $saturdayDelivery = false;
             }
 

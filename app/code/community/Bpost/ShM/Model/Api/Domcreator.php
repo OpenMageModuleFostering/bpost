@@ -34,7 +34,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
         $senderData->setCity($configHelper->getBpostShippingConfig("sender_city"));
         $senderData->setCountryId($configHelper->getBpostShippingConfig("sender_country"));
         $senderData->setEmail($configHelper->getBpostShippingConfig("sender_email"));
-        $senderData->setTelephone($configHelper->getBpostShippingConfig("sender_phonenumber"));
+        $senderData->setTelephone(preg_replace('/[^0-9]/s', '',$configHelper->getBpostShippingConfig("sender_phonenumber")));
 
         //get receiver
         $this->_shippingAddress = $order->getShippingAddress();
@@ -46,7 +46,10 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
             $tmpShippingAddress = $this->_shippingAddress;
             $this->_shippingAddress = $senderData;
             $senderData = $tmpShippingAddress;
-            $senderData->setBpostName($this->_billingAddress->getFirstname()." ".$this->_billingAddress->getLastname());
+
+            if($shippingMethod != "bpostshm_bpost_international" && $shippingMethod != "bpostshm_bpost_homedelivery"){
+                $senderData->setBpostName($this->_billingAddress->getFirstname()." ".$this->_billingAddress->getLastname());
+            }
 
             if($shippingMethod != "bpostshm_bpost_international"){
                 //we force shipping to 'bpostshm_bpost_homedelivery' method because we are creating a return order
@@ -178,7 +181,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
         $senderEmail->appendChild($document->createTextNode($senderData->getEmail()));
 
         $senderPhoneNumber = $document->createElement('common:phoneNumber');
-        $senderPhoneNumber->appendChild($document->createTextNode($senderData->getTelephone()));
+        $senderPhoneNumber->appendChild($document->createTextNode(preg_replace('/[^0-9]/s', '',$senderData->getTelephone())));
 
         //add all sender info to the sender element
         $sender = $document->createElement('tns:sender');
@@ -223,12 +226,11 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
         $manageLabelsWithMagento = $configHelper->getBpostShippingConfig("manage_labels_with_magento");
 
         $requestedDeliveryDate = false;
-        $dropDate = new DateTime($order->getBpostDropDate());
+        $dropDate = new DateTime($order->getBpostDeliveryDate());
         $currentDate = new DateTime();
-
         if($dropDate && $dropDate > $currentDate) {
             $requestedDeliveryDate = $document->createElement('requestedDeliveryDate');
-            $requestedDeliveryDate->appendChild($document->createTextNode($order->getBpostDropDate()));
+            $requestedDeliveryDate->appendChild($document->createTextNode($order->getBpostDeliveryDate()));
         }
 
         //add product
@@ -283,7 +285,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
                 $receiverEmailAddress->appendChild($document->createTextNode($this->_shippingAddress->getEmail()));
 
                 $receiverPhoneNumber = $document->createElement('common:phoneNumber');
-                $receiverPhoneNumber->appendChild($document->createTextNode($this->_shippingAddress->getTelephone()));
+                $receiverPhoneNumber->appendChild($document->createTextNode(preg_replace('/[^0-9]/s', '',$this->_shippingAddress->getTelephone())));
 
                 //we add the receiver address data
                 $streetName->appendChild($document->createTextNode($this->_shippingAddress->getBpostStreet()));
@@ -405,11 +407,8 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
 
             case "bpostshm_bpost_parcellocker":
 
-                if(!$order->getBpostPickuplocationId()){
-                    //only throw error in backend
-                    if($manageLabelsWithMagento){
+                if(!$order->getBpostPickuplocationId() && $manageLabelsWithMagento){
                         Mage::throwException("No parcel locker data found.");
-                    }
                 }
 
                 $product->appendChild($document->createTextNode("bpack 24h Pro"));
@@ -461,7 +460,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
 
                 if($order->getBpostNotificationSms()){
                     $mobilePhone = $document->createElement('mobilePhone');
-                    $mobilePhone->appendChild($document->createTextNode($this->_shippingAddress->getTelephone()));
+                    $mobilePhone->appendChild($document->createTextNode(preg_replace('/[^0-9]/s', '',$this->_shippingAddress->getTelephone())));
                     $unregistered->appendChild($mobilePhone);
                 }
 
@@ -479,6 +478,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
                     $at247->appendChild($options);
                 }
 
+
                 $at247->appendChild($weight);
                 $at247->appendChild($parcelsDepotId);
                 $at247->appendChild($parcelsDepotName);
@@ -489,10 +489,13 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
                 $at247->appendChild($receiverName);
                 $at247->appendChild($receiverCompany);
 
+                if($requestedDeliveryDate) {
+                    $at247->appendChild($requestedDeliveryDate);
+                }
+
                 $nationalBox->appendChild($at247);
                 break;
         }
-
         return $nationalBox;
     }
 
@@ -537,7 +540,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
         $receiverEmailAddress->appendChild($document->createTextNode($this->_shippingAddress->getEmail()));
 
         $receiverPhoneNumber = $document->createElement('common:phoneNumber');
-        $receiverPhoneNumber->appendChild($document->createTextNode($this->_shippingAddress->getTelephone()));
+        $receiverPhoneNumber->appendChild($document->createTextNode(preg_replace('/[^0-9]/s', '',$this->_shippingAddress->getTelephone())));
 
         //add address info
         $streetName = $document->createElement('common:streetName');
@@ -633,8 +636,12 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
         $helper = Mage::helper("bpost_shm/system_config");
         $storeId = $order->getStoreId();
         $option = $helper->getBpostCarriersConfig($configName, $carrier, $storeId);
+        $deliveryDate = $order->getBpostDeliveryDate();
+        $dateModel = Mage::getSingleton('core/date');
 
-        if($bpostValue == "saturdayDelivery" && $order->getBpostDisableSaturdayDelivery()){
+        if($dateModel->date('N', strtotime($deliveryDate)) != 6 &&
+            $bpostValue == "saturdayDelivery" &&
+            Mage::helper("bpost_shm/system_config")->getBpostShippingConfig("display_delivery_date",$storeId)){
             return $options;
         }
 
@@ -687,7 +694,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
             $childElement->appendChild($document->createTextNode($shippingAddress->getEmail()));
         }else{
             $childElement = $document->createElement("common:mobilePhone");
-            $childElement->appendChild($document->createTextNode($shippingAddress->getTelephone()));
+            $childElement->appendChild($document->createTextNode(preg_replace('/[^0-9]/s', '',$shippingAddress->getTelephone())));
         }
 
         $notificationElement->appendChild($childElement);

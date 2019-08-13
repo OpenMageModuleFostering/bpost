@@ -12,7 +12,7 @@ Bpost.ShM.addMethods({
             overlayOpacity: 0.65,
             fade: true,
             fadeDuration: 0.3,
-            position: 'center_once'
+            position: 'center'
         });
 
 
@@ -44,7 +44,6 @@ Bpost.ShM.addMethods({
                 this.placeDates(this.settings.datepicker_days, currMethod);
             }
         }
-
         this.selectPickupPointLinkClick = this.selectPickupPointLinkClick.bind(this);
         this.resolveSettings = this.resolveSettings.bind(this);
         this.openInline = this.openInline.bind(this);
@@ -81,7 +80,7 @@ Bpost.ShM.addMethods({
             anchor: new google.maps.Point(24, 36)
         };
         this.mapOptions = {
-            zoom: 11,
+            zoom: 13,
             panControl: false,
             zoomControl: true,
             zoomControlOptions: {
@@ -128,11 +127,13 @@ Bpost.ShM.addMethods({
         }
 
         initialized = true;
+        if(this.settings.datepicker_display && this.settings.datepicker_choose) {
+            window.isSaturdaySelected = false;
+        }
     },
     selectPickupPointLinkClick: function () {
         //set shipping parameters
         this.setShippingParameters();
-
         //first check if all necessary parameters are set
         if(shippingParameters["address_id"] == null && shippingParameters["postcode"] == "" && shippingParameters["city"] == ""){
             alert(this.settings.onestepcheckout_shipping_address_error);
@@ -227,6 +228,62 @@ Bpost.ShM.addMethods({
                         shippingParameters[indexMapping[s.id]] = s.getValue();
                     }
                 });
+            }
+        }
+    }, placeDates: function (dates, currMethod) {
+
+        $$('.bpost-saturday-delivery')[0].style.display = 'none';
+        if(this.settings.datepicker_display && this.settings.datepicker_choose) {
+            $$('input[name="bpost[deliverydate]"]')[0].remove();
+
+            var pickDates = '<ul>';
+            var datepickArray = dates;
+            var dates = datepickArray[currMethod];
+            var saturdayPresent = false;
+            for (var i = 0; i < dates.length; i++) {
+                var date = new Date(dates[i]['date']);
+                window.clickVar = "";
+                if(date.getDay() == 6){
+                    clickVar="window.isSaturdaySelected = true;";
+                }
+                else{
+                    clickVar="window.isSaturdaySelected = false;";
+                }
+                pickDates += '<li><label for="bpost-datepicker-'+i+'"><input type="radio" name="bpost[deliverydate]" class="deliveryDates" onclick="'+clickVar+' triggerAjaxCallGetSeparateSaveMethods(\''+window.onestepcheckout_set_methods_separate+'\', false);" id="bpost-datepicker-'+i+'" value="'+dates[i]['date']+'" /> '+dates[i]['date_format']+'</label></li>';
+            }
+            //add hidden input for validation message position
+            pickDates += '<li><input type="radio" name="bpost[deliverydate]" class="validate-multiple-delivery-dates" id="bpost-datepicker-advice" style="display: none;" /></li>';
+            pickDates += '</ul>';
+
+            var chooseDate = $$('.bpost-choose-deliverydate')[0];
+            chooseDate.innerHTML = pickDates;
+            chooseDate.style.display = 'block';
+
+        } else if(this.settings.datepicker_display && !this.settings.datepicker_choose) {
+            var displayDate = $$('.bpost-display-deliverydate')[0];
+            var datepickArray = dates;
+
+            displayDate.innerHTML = datepickArray[currMethod]['date_format'];
+            displayDate.style.display = 'block';
+
+            //var inputElement = '<input type="hidden" name="bpost[deliverydate]" vale="'+datepickArray[currMethod]['date']+'"/>';
+            $$('input[name="bpost[deliverydate]"]')[0].value = datepickArray[currMethod]['date'];
+
+            if($('bpost-saturday-hidden') != undefined) {
+                $('bpost-saturday-hidden').remove();
+            }
+
+            //saturday delivery option
+            if(datepickArray[currMethod]['is_saturday']) {
+                $$('.bpost-saturday-delivery')[0].style.display = 'block';
+                if($('bpost-saturday').checked) {
+                    displayDate.innerHTML = datepickArray[currMethod]['next_date_format'];
+                    displayDate.style.display = 'block';
+                    $$('input[name="bpost[deliverydate]"]')[0].value = datepickArray[currMethod]['next_date'];
+                } else {
+                    //create hidden input if not checked but a saturday
+                    $('bpost-saturday').insert({before: '<input type="hidden" name="bpost_saturday_delivery" id="bpost-saturday-hidden" value="" />'})
+                }
             }
         }
     }

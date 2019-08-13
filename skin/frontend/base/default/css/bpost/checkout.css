@@ -406,19 +406,6 @@ ul#bpostlist li .city {
     font-size: 12px;
 }
 
-@media only screen and (max-width: 667px) {
-    #map-canvas {
-        display: none;
-    }
-    #bpostlist {
-        width: 100% !important;
-    }
-
-    .bpost-input-box .input {
-        width: 80%;
-    }
-}
-
 #bpostDelivery {
     display: none;
     width: 100%;
@@ -572,4 +559,43 @@ ul#bpostlist li .city {
 
 #bpostShm #notifications-parcel-locker h5, #bpostShm #notifications-pick-up-point h5, #bpostDelivery h5{
     color:#dc002e;
+}
+
+/* ********************* */
+/* ***Media queries*** */
+/* ********************* */
+
+@media only screen and (max-width: 667px) {
+    #map-canvas {
+        display: none;
+    }
+    #bpostlist {
+        width: 100% !important;
+    }
+
+    .bpost-input-box .input {
+        width: 80%;
+    }
+}
+
+@media only screen and (max-width: 760px) {
+
+    .onestepcheckout-index-index #map-canvas {
+        display: none;
+    }
+
+    .onestepcheckout-index-index #bpostlist {
+        width: 100% !important;
+    }
+
+    .onestepcheckout-index-index .bpost-input-box .input {
+        width: 80%;
+    }
+    .onestepcheckout-index-index #bpost-info-wrapper{
+        width:100%;
+    }
+    .onestepcheckout-index-index div#bpostinfo ul.list{
+        margin-top:15px;
+    }
+    
 }

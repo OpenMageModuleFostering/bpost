@@ -6,15 +6,30 @@ get_separate_save_methods_function = function get_separate_save_methods_function
 
     return function(e)    {
         triggerAjaxCallGetSeparateSaveMethods(url, update_payments);
-    }
+    };
 }
 
 triggerAjaxCallGetSeparateSaveMethods = function (url, update_payments){
+    var form = $('onestepcheckout-form');
+    var shipping_method = $RF(form, 'shipping_method');
+    if( window.bpostSettings){
+    var shippingmethodDate = window.bpostSettings.datepicker_days[shipping_method.replace('bpostshm_', '')]['date'];
+    var currentDate = new Date(shippingmethodDate);
+    var currentDay = currentDate.getDay();
     var saturdayDelivery = 0;
-
+    }
+    else{
+        currentDay = "";
+    }
     //if undefined, page load
-    if($('bpost-saturday')){
-        if($('bpost-saturday').checked ){
+    if(update_payments == true && window.bpostSettings.datepicker_choose == true){
+        window.isSaturdaySelected = false;
+    }
+
+    if($('bpost-saturday') || window.isSaturdaySelected !== undefined){
+        if(($('bpost-saturday').checked && $$('.bpost-saturday-delivery')[0].visible())
+            || (!window.isSaturdaySelected && window.isSaturdaySelected !== undefined)
+            || (currentDay != 6 && !window.bpostSettings.datepicker_choose)){
             saturdayDelivery = 1;
         }
     }
@@ -26,9 +41,6 @@ triggerAjaxCallGetSeparateSaveMethods = function (url, update_payments){
             update_payments = false;
         }
     }
-
-    var form = $('onestepcheckout-form');
-    var shipping_method = $RF(form, 'shipping_method');
     var payment_method = $RF(form, 'payment[method]');
     var totals = get_totals_element();
 
