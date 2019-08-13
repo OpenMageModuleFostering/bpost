@@ -30,8 +30,8 @@ class Bpost_ShM_Model_Observer extends Varien_Event_Observer
                 $html = $observer->getTransport()->getHtml();
 
                 //add logo to carrier
-                $baseUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK, true);
-                $logo = $baseUrl . 'skin/frontend/base/default/images/bpost/bpost_sym_RGB72_S.png';
+                $logo = Mage::getDesign()->getSkinUrl("images/bpost/bpost_sym_RGB72_S.png");
+
                 $html = str_replace('<dt>bpost</dt>', '<dt><img src="'.$logo.'" class="bpost-carrier-logo" />bpost</dt>', $html);
                 //if onestepcheckout dd's are used instead of dt's
                 $html = str_replace('<dd>bpost</dd>', '<dd><img src="'.$logo.'" class="bpost-carrier-logo" />bpost</dd>', $html);
