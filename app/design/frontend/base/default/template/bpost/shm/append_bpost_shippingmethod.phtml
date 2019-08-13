@@ -54,13 +54,20 @@
             <div class="bpost-label-text"><?php echo $settings['datepicker_saturday_delivery_text'] ?><?php if($this->getSaturdayDeliveryCost()) { ?><br /><small><?php echo sprintf($settings['datepicker_saturday_delivery_cost'], $this->getSaturdayDeliveryCost()) ?></small><?php } ?></div>
         </label>
     </div>
-    <input type="hidden" name="bpost[deliverydate]" class="required-entry"/>
+    <input type="hidden" name="bpost[deliverydate]" class="deliverydate-required-entry"/>
 </div>
 
 <script type="text/javascript">
     window.onestepcheckout_set_methods_separate = '<?php echo $this->getUrl('onestepcheckout/ajax/set_methods_separate', array('_secure'=>true));?>';
     window.bpostSettings = <?php echo json_encode($settings); ?>;
     window.bpostShM = new Bpost.ShM(window.bpostSettings, "<?php echo $this->getCurrentShippingMethod(); ?>");
+
+    Validation.add('deliverydate-required-entry', "<?php echo Mage::helper('bpost_shm')->__('This is a required field.'); ?>", function (v) {
+        if($('bpostDelivery').getStyle('display') == 'none'){
+            return true;
+        }
+        return !Validation.get('IsEmpty').test(v);
+    });
 
     Validation.add('validate-bpostspot', "<?php echo Mage::helper('bpost_shm')->__('Please select a bpost pick-up point'); ?>", function (v) {
         if($('s_method_bpostshm_bpost_pickuppoint')) {
@@ -81,7 +88,7 @@
     });
 
     Validation.add('validate-multiple-delivery-dates', "<?php echo Mage::helper('bpost_shm')->__('Please select a delivery date'); ?>", function (v,elm) {
-        var inputs = $$('input[name="' + elm.name.replace(/([\\"])/g, '\\$1') + '"]');
+        var inputs = $$('input[name="bpost[deliverydate]"]');
 
         var error = 1;
         for(var i=0;i<inputs.length;i++) {

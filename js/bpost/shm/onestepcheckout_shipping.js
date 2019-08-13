@@ -260,7 +260,7 @@ Bpost.ShM.addMethods({
                 pickDates += '<li><label for="bpost-datepicker-'+i+'"><input type="radio" name="bpost[deliverydate]" class="deliveryDates" onclick="'+clickVar+' triggerAjaxCallGetSeparateSaveMethods(\''+window.onestepcheckout_set_methods_separate+'\', false);" id="bpost-datepicker-'+i+'" value="'+dates[i]['date']+'" /> '+dates[i]['date_format']+'</label></li>';
             }
             //add hidden input for validation message position
-            pickDates += '<li><input type="radio" name="bpost[deliverydate]" class="validate-multiple-delivery-dates" id="bpost-datepicker-advice" style="display: none;" /></li>';
+            pickDates += '<li><input type="hidden" class="validate-multiple-delivery-dates" id="bpost-datepicker-advice" /></li>';
             pickDates += '</ul>';
 
             var chooseDate = $$('.bpost-choose-deliverydate')[0];

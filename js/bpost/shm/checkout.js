@@ -112,12 +112,6 @@ Bpost.ShM = Class.create({
             }
         }
 
-        if(currentShippingMethod.indexOf("bpostshm_bpost_") === 0) {
-            $$('input[name="bpost[deliverydate]"]').first().addClassName('required-entry');
-        } else {
-            $$('input[name="bpost[deliverydate]"]').first().removeClassName('required-entry');
-        }
-
         //set initial selected spot to false
         this.selectedspot = false;
 
@@ -184,12 +178,6 @@ Bpost.ShM = Class.create({
         $(document).on('change', 'input[type=radio][name=shipping_method]', function (event) {
             //move map to correct shipping method
             var target = event.target;
-
-            if(event.target.value.indexOf("bpostshm_bpost_") === 0) {
-                $$('input[name="bpost[deliverydate]"]').first().addClassName('required-entry');
-            } else {
-                $$('input[name="bpost[deliverydate]"]').first().removeClassName('required-entry');
-            }
             
             this.rePosition(target);
             //show delivery date option
@@ -339,8 +327,9 @@ Bpost.ShM = Class.create({
                 }
                 pickDates += '<li><label for="bpost-datepicker-'+i+'"><input type="radio" name="bpost[deliverydate]" onclick="'+clickVar+'" id="bpost-datepicker-'+i+'" value="'+dates[i]['date']+'" /> '+dates[i]['date_format']+'</label></li>';
             }
+
             //add hidden input for validation message position
-            pickDates += '<li><input type="radio" name="bpost[deliverydate]" class="validate-multiple-delivery-dates" id="bpost-datepicker-advice" style="display: none;" /></li>';
+            pickDates += '<li><input type="hidden" class="validate-multiple-delivery-dates" id="bpost-datepicker-advice"/></li>';
             pickDates += '</ul>';
 
             var chooseDate = $$('.bpost-choose-deliverydate')[0];
@@ -354,7 +343,6 @@ Bpost.ShM = Class.create({
             displayDate.innerHTML = datepickArray[currMethod]['date_format'];
             displayDate.style.display = 'block';
 
-            //var inputElement = '<input type="hidden" name="bpost[deliverydate]" vale="'+datepickArray[currMethod]['date']+'"/>';
             $$('input[name="bpost[deliverydate]"]')[0].value = datepickArray[currMethod]['date'];
 
             if($('bpost-saturday-hidden') != undefined) {
