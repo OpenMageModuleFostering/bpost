@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Bpost_ShM>
-            <version>1.3.4</version>
+            <version>1.3.6</version>
         </Bpost_ShM>
     </modules>
     <global>
@@ -313,6 +313,7 @@
             </bpostshm>
             <bpost_homedelivery>
                 <active>1</active>
+                <product>0</product>
                 <title>bpost</title>
                 <name>Home delivery</name>
                 <free_shipping>0</free_shipping>

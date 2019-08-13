@@ -265,7 +265,10 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
         switch($shippingMethod){
             case "bpostshm_bpost_homedelivery":
                 if(!$returnOrder){
-                    $product->appendChild($document->createTextNode("bpack 24h Pro"));
+                    $productType = $configHelper->getBpostCarriersConfig("product", "bpost_homedelivery", $order->getStoreId());
+                    ($productType == 0 ? $productType = "bpack 24h Pro" : $productType = "bpack 24h business");
+
+                    $product->appendChild($document->createTextNode($productType));
 
                     //then get config the option settings
                     $options = $this->_checkIfOptionIsValid($document, $options, $order, "bpost_homedelivery", "second_presentation", "automaticSecondPresentation");
@@ -380,7 +383,9 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
 
                 $pugoAddress = $document->createElement('pugoAddress');
                 $pugoAddress->appendChild($streetName);
-                $pugoAddress->appendChild($streetNumber);
+                if (null !== $formattedAddress["number"]) {
+                    $pugoAddress->appendChild($streetNumber);
+                }
                 $pugoAddress->appendChild($streetPostalCode);
                 $pugoAddress->appendChild($locality);
                 $pugoAddress->appendChild($countryCode);
@@ -438,7 +443,9 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
 
                 $parcelsDepotAddress = $document->createElement('parcelsDepotAddress');
                 $parcelsDepotAddress->appendChild($streetName);
-                $parcelsDepotAddress->appendChild($streetNumber);
+                if (null !== $formattedAddress["number"]) {
+                    $parcelsDepotAddress->appendChild($streetNumber);
+                }
                 $parcelsDepotAddress->appendChild($streetPostalCode);
                 $parcelsDepotAddress->appendChild($locality);
                 $parcelsDepotAddress->appendChild($countryCode);
@@ -541,7 +548,9 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
 
                 $pugoAddress = $document->createElement('pugoAddress');
                 $pugoAddress->appendChild($streetName);
-                $pugoAddress->appendChild($streetNumber);
+                if (null !== $formattedAddress["number"]) {
+                    $pugoAddress->appendChild($streetNumber);
+                }
                 $pugoAddress->appendChild($streetPostalCode);
                 $pugoAddress->appendChild($locality);
                 $pugoAddress->appendChild($countryCode);

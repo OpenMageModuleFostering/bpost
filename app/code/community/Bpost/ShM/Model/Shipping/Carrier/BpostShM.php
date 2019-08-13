@@ -131,7 +131,7 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
                 $error = Mage::getModel('shipping/rate_result_error');
                 $error->setCarrier($this->_code);
                 $error->setCarrierTitle('Bpost ShippingManager');
-                $error->setData('error_message', Mage::helper('bpost_shm')->__('The Bpost shipping method "%s" is not available because your postal code is not correct. For your country the format should be like "%s". Please correct the postal code in your shipping address.', $shippingMethodName, $pcValidationResult));
+                $error->setData('error_message', Mage::helper('bpost_shm')->__('Could you please use the following zipcode format "%s" for the selected country in order to make the bpost delivery method "%s" available.', $pcValidationResult, $shippingMethodName));
                 $result->append($error);
                 continue;
             }

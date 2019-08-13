@@ -544,7 +544,8 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
             'bpost_homedelivery' => false,
             'bpost_pickuppoint' => false,
             'bpost_parcellocker' => false,
-            'bpost_clickcollect' => false
+            'bpost_clickcollect' => false,
+            'bpost_international' => false,
         );
         foreach ($shippingMethods as $method => $value) {
             //get saturday delivery flags

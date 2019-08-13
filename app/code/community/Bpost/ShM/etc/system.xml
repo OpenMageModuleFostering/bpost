@@ -371,6 +371,19 @@
                             <comment><![CDATA[Delivery at your doorstep or at your office? bpack@home is the most convenient option for you!]]></comment>
                         </active>
 
+                        <product translate="label,comment">
+                            <label>Product</label>
+                            <frontend_type>select</frontend_type>
+                            <frontend_model>bpost_shm/adminhtml_system_config_form_field_bpack</frontend_model>
+                            <source_model>bpost_shm/system_config_source_product_bpack</source_model>
+                            <backend_model>bpost_shm/system_config_backend_product_bpack</backend_model>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[Select which product to use for bpack 24h shipments]]></comment>
+                        </product>
+
                         <subheader_rates translate="label">
                             <label>Rates</label>
                             <frontend_type>text</frontend_type>
