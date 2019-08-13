@@ -666,7 +666,13 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
 
         //create customsInfo child elements
         $parcelValue = $document->createElement('international:parcelValue');
-        $parcelValue->appendChild($document->createTextNode((round($order->getGrandTotal(), 2) * 100)));
+        
+        $grandTotalExclDiscount = (round(($order->getGrandTotal()+abs($order->getDiscountAmount())), 2) * 100);
+        if ($grandTotalExclDiscount < 100) {
+            $grandTotalExclDiscount = 100;
+        }
+
+        $parcelValue->appendChild($document->createTextNode($grandTotalExclDiscount));
 
         $contentDescription = $document->createElement('international:contentDescription');
         $contentDescription->appendChild($document->createTextNode("no description"));

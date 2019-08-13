@@ -37,6 +37,12 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
         $ratePriceByMethod = array();
         $totalAallowedShippingMethods = count($this->getAllowedMethods());
 
+        $quote2 = Mage::getSingleton('checkout/session')->getQuote();
+        $discountTotal = 0;
+        foreach ($quote2->getAllItems() as $item){
+            $discountTotal += $item->getDiscountAmount();
+        }
+
         foreach ($this->getAllowedMethods() as $shippingMethodCode => $shippingMethodName) {
             if (!$this->getBpostConfigData('active', $shippingMethodCode) || !$this->checkAvailableBpostShipCountries($request, $shippingMethodCode)) {
                 $disabledShippingMethods++;
@@ -48,7 +54,7 @@ class Bpost_ShM_Model_Shipping_Carrier_BpostShM extends Mage_Shipping_Model_Carr
                 $price = $this->getBpostConfigData('flat_rate_price', $shippingMethodCode);
                 if ($request->getFreeShipping() === true ||
                     ($this->getBpostConfigData('free_shipping', $shippingMethodCode) &&
-                        $request->getPackageValue() >= $this->getBpostConfigData('free_shipping_from', $shippingMethodCode))
+                        $request->getBaseSubtotalInclTax() - $discountTotal >= $this->getBpostConfigData('free_shipping_from', $shippingMethodCode))
                 ) {
                     $price = 0;
                 }

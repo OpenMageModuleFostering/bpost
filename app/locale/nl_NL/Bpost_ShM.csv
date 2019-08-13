@@ -8,7 +8,6 @@
 "Account id","Account id"
 "Action","Actie"
 "Actions","Acties"
-"Additional fee when using saturday delivery option, e.g.: 4.95.","Additionale kost voor zaterdaglevering, e.g.: 4.95."
 "All bposts orders","Alle bpost orders"
 "Allow customer to choose their delivery date","Uw klant toelaten om de leveringsdatum te kiezen"
 "Allow free shipping","Gratis verzending toelaten"
@@ -256,3 +255,4 @@
 "If you have added or removed Click & Collect points in Shipping Manager, be aware that it will take up to 24h to be operational in the bpost Magento plugin.","Als u een Click & Collect punt toevoegt of verwijdert in uw Shipping Manager, duurt het 24u vooraleer dit operationeel wordt in uw bpost plugin voor Magento."
 "If the points don’t appear after 24h, make sure to have cleared the Magento cache.","Als u deze afhaalpunten niet ziet verschijnen na 24u, verzeker u er dan van dat u de Magento cache hebt geleegd."
 "Before using this delivery method, make sure that Click & Collect is duely activated. This is a 2 step process. Find out how here.","Vooraleer u met deze leveringsmethode van start kun gaan, moeten volgende activaties gebeurd zijn."
+"Additional fee when using saturday delivery option, e.g.: 4.95.<br />Dear customer, if you decide to offer your own consumers the option of Saturday delivery, you need to select 'Display delivery date' in the general parameters of the plugin and enter the requested information.","Additionale kost voor zaterdaglevering, e.g.: 4.95.<br />Beste klant, als u ervoor koos om uw klant de mogelijkheid te geven om zijn pakje zaterdag te laten leveren, kies dan 'De leveringsdatum tonen' in de algemene parameters van de plugin, en vul de gevraagde gegevens in."

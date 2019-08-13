@@ -291,7 +291,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment><![CDATA[Additional fee when using saturday delivery option, e.g.: 4.95.]]></comment>
+                            <comment><![CDATA[Additional fee when using saturday delivery option, e.g.: 4.95.<br />Dear customer, if you decide to offer your own consumers the option of Saturday delivery, you need to select 'Display delivery date' in the general parameters of the plugin and enter the requested information.]]></comment>
                         </saturday_delivery_cost>
 
                         <weight_unit translate="label,comment">
