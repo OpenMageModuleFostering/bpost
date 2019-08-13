@@ -559,14 +559,14 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
 
             //loop over days checking for the first valid day
             for($i = 1; $i <= $totalDays; $i++) {
-                $nextDate = $dateModel->date("Y-m-d", strtotime($currentDate.' +'.$i.' days'));
+                $nextDate = $this->_formatDeliveryDate($currentDate.' +'.$i.' days');
 
                 if(!$this->_isValidDeliveryDate($nextDate, $saturdayDelivery, $method, $closedOn)) {
                     $totalDays++;
                 }
             }
 
-            $startDate = $dateModel->date("Y-m-d", strtotime($currentDate.' +'.$totalDays.' days'));
+            $startDate = $this->_formatDeliveryDate($currentDate.' +'.$totalDays.' days');
 
             //customer gets a date from the system
             if($displayDeliveryDate && !$chooseDeliveryDate) {
@@ -592,7 +592,7 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
                     //move to next day
                     } else {
                         $addedDays++;
-                        $nextDate = $dateModel->date("Y-m-d", strtotime($startDate.' +'.$addedDays.' days'));
+                        $nextDate = $this->_formatDeliveryDate($startDate.' +'.$addedDays.' days');
 
                         $validDate = false;
                         while($validDate == false) {
@@ -600,7 +600,7 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
                                 $validDate = true;
                             } else {
                                 $addedDays++;
-                                $nextDate = $dateModel->date("Y-m-d", strtotime($startDate.' +'.$addedDays.' days'));
+                                $nextDate = $this->_formatDeliveryDate($startDate.' +'.$addedDays.' days');
                             }
                         }
 
@@ -623,17 +623,16 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
      * @return date
      */
     public function getPrevDeliveryDate($deliveryDate){
-        $dateModel = Mage::getModel("core/date");
         $days = 1;
         $validDate = false;
-        $previousWeekday = $dateModel->date('Y-m-d', strtotime($deliveryDate.' -'.$days.' weekdays'));
+        $previousWeekday = $this->_formatDeliveryDate($deliveryDate.' -'.$days.' weekdays');
 
         while($validDate == false) {
             if($this->_isValidDeliveryDate($previousWeekday)) {
                 $validDate = true;
             } else {
                 $days++;
-                $previousWeekday = $dateModel->date('Y-m-d', strtotime($deliveryDate.' -'.$days.' weekdays'));
+                $previousWeekday = $this->_formatDeliveryDate($deliveryDate.' -'.$days.' weekdays');
             }
         }
 
@@ -649,13 +648,12 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
      * @return array
      */
     protected function _getNextDeliveryDate($date, $format = "Y-m-d") {
-        $dateModel = Mage::getSingleton('core/date');
         $nextDate = false;
 
         if($this->_isSaturday($date)) {
             //add a weekday so we end up on monday
             $extraWeekDays = 1;
-            $nextDate = $dateModel->date("Y-m-d", strtotime("$date +$extraWeekDays weekdays"));
+            $nextDate = $this->_formatDeliveryDate("$date +$extraWeekDays weekdays");
 
             //check for holidays (monday will most likely not be a saturday or a sunday, and holidays sadly don't take a week)
             $validDeliveryDate = false;
@@ -664,7 +662,7 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
                     $validDeliveryDate = true;
                 } else {
                     $extraWeekDays++;
-                    $nextDate = $dateModel->date("Y-m-d", strtotime("$date +$extraWeekDays weekdays"));
+                    $nextDate = $this->_formatDeliveryDate("$date +$extraWeekDays weekdays");
                 }
             }
 
@@ -707,9 +705,7 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected function _isSaturday($date)
     {
-        $dateModel = Mage::getSingleton('core/date');
-
-        return ($dateModel->date('N', strtotime($date)) == 6);
+        return ($this->_formatDeliveryDate($date, "N") == 6);
     }
 
     /**
@@ -720,9 +716,7 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected function _isSunday($date)
     {
-        $dateModel = Mage::getSingleton('core/date');
-
-        return ($dateModel->date('N', strtotime($date)) == 7);
+        return ($this->_formatDeliveryDate($date, "N") == 7);
     }
 
     /**
@@ -751,9 +745,7 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
      * @return date
      */
     protected function _formatDeliveryDate($date, $format = "Y-m-d") {
-        $dateModel = Mage::getSingleton('core/date');
-
-        return $dateModel->date($format, strtotime($date));
+        return date($format, strtotime($date));
     }
 
     /**
