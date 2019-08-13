@@ -283,7 +283,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
                 $receiverCompany->appendChild($document->createTextNode($this->_shippingAddress->getBpostCompany()));
 
                 $receiverEmailAddress = $document->createElement('common:emailAddress');
-                $receiverEmailAddress->appendChild($document->createTextNode($this->_shippingAddress->getEmail()));
+                $receiverEmailAddress->appendChild($document->createTextNode($this->_billingAddress->getEmail()));
 
                 $receiverPhoneNumber = $document->createElement('common:phoneNumber');
                 $receiverPhoneNumber->appendChild($document->createTextNode(preg_replace('/[^0-9]/s', '',$this->_shippingAddress->getTelephone())));
@@ -452,7 +452,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
                 $messageLanguage->appendChild($document->createTextNode($locale));
 
                 $email = $document->createElement('emailAddress');
-                $email->appendChild($document->createTextNode($this->_shippingAddress->getEmail()));
+                $email->appendChild($document->createTextNode($this->_billingAddress->getEmail()));
 
                 //Indication if this user has reduced mobility Y/N
                 //comes from frontend
@@ -538,7 +538,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
         $receiverCompany->appendChild($document->createTextNode($this->_shippingAddress->getBpostCompany()));
 
         $receiverEmailAddress = $document->createElement('common:emailAddress');
-        $receiverEmailAddress->appendChild($document->createTextNode($this->_shippingAddress->getEmail()));
+        $receiverEmailAddress->appendChild($document->createTextNode($this->_billingAddress->getEmail()));
 
         $receiverPhoneNumber = $document->createElement('common:phoneNumber');
         $receiverPhoneNumber->appendChild($document->createTextNode(preg_replace('/[^0-9]/s', '',$this->_shippingAddress->getTelephone())));
@@ -685,6 +685,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
         $language = $bpostHelper->getLocaleByOrder($order, true);
 
         $shippingAddress = $order->getShippingAddress();
+        $billingAddress = $order->getBillingAddress();
 
         $languageAttribute = $document->createAttribute("language");
         $languageAttribute->value = $language;
@@ -692,7 +693,7 @@ class Bpost_ShM_Model_Api_Domcreator extends Bpost_ShM_Model_Api_Abstract
 
         if($communicationBy === "email"){
             $childElement = $document->createElement("common:emailAddress");
-            $childElement->appendChild($document->createTextNode($shippingAddress->getEmail()));
+            $childElement->appendChild($document->createTextNode($billingAddress->getEmail()));
         }else{
             $childElement = $document->createElement("common:mobilePhone");
             $childElement->appendChild($document->createTextNode(preg_replace('/[^0-9]/s', '',$shippingAddress->getTelephone())));
