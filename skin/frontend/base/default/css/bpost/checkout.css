@@ -252,6 +252,7 @@ ul#bpostlist li .title {
     display: block;
     clear: both;
     color: #DC002E;
+    font-size: 15px;
 }
 
 ul#bpostlist li .address {
@@ -435,7 +436,7 @@ ul#bpostlist li .city {
 #bpostDelivery .bpost-choose-deliverydate ul li {
     display: inline-block;
     margin-right: 5px;
-    margin-bottom: 0px;
+    margin-bottom: 5px;
 }
 
 #bpostDelivery .bpost-choose-deliverydate ul li:last-child {

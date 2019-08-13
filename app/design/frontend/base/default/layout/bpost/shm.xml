@@ -22,6 +22,8 @@
         <update handle="checkout_header"/>
 
         <reference name="head">
+            <block type="core/template" name="oscwindowjs" template="bpost/shm/oscwindowjs.phtml"/>
+
             <action method="addJs">
                 <script>bpost/shm/onestepcheckout_shipping.js</script>
             </action>

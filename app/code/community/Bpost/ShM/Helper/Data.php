@@ -785,6 +785,19 @@ class Bpost_ShM_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Get Onestepcheckout version
+     *
+     * @return string
+     */
+    public function getOnestepCheckoutVersion()
+    {
+        $version = Mage::getConfig()->getNode()->modules->Idev_OneStepCheckout->version;
+        list($major, $minor) = explode('.', $version);
+
+        return (string) $major . '.' . $minor;
+    }
+
+    /**
      * Calculates total weight of a shipment.
      *
      * @param $shipment
