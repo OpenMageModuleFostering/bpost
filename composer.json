@@ -1,16 +1,19 @@
 {
-    "name": "OpenMageModuleFostering/bpost",
+    "name": "OpenMageModuleFostering\/bpost",
     "type": "magento-module",
     "license": "OSL-v3.0",
     "homepage": "",
     "description": "bpost shipping manager 2015",
     "authors": [
-    {
-        "name": "PHPro",
-        "email": "info@phpro.be"
-    }
-],
+        {
+            "name": "PHPro",
+            "email": "info@phpro.be"
+        }
+    ],
     "suggest": {
-        "magento-hackathon/magento-composer-installer": "*"
-    }
+        "magento-hackathon\/magento-composer-installer": "*"
+    },
+    "keywords": [
+        "openmage-module"
+    ]
 }
